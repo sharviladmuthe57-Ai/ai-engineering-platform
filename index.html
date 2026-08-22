@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project V1 — AI Electrical Planning</title>
+<style>
+:root{--bg:#0D1117;--panel:#161B22;--border:#30363D;--accent:#1A85FF;--green:#3FB950;--yellow:#D29922;--red:#F85149;--text:#E6EDF3;--muted:#8B949E;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;min-height:100vh}
+nav{background:var(--panel);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;height:56px;gap:12px}
+.logo{font-weight:700;font-size:16px;color:var(--accent)}
+.badge{background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.badge-cv{background:#6E40C9;color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.container{max-width:1140px;margin:0 auto;padding:28px 20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card h2{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.step-num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(26,133,255,.05)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .icon{font-size:34px;margin-bottom:10px}
+#preview-img{width:100%;border-radius:8px;border:1px solid var(--border);display:none;margin-top:12px;max-height:200px;object-fit:contain;background:#000}
+select,input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;margin-top:6px}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
+.dim-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.dim-row label{margin-top:0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-full{width:100%;justify-content:center;margin-top:14px}
+.status-bar{display:none;padding:10px 14px;border-radius:6px;margin-top:12px;font-size:13px;align-items:center;gap:8px}
+.status-bar.info{background:rgba(26,133,255,.12);border:1px solid rgba(26,133,255,.3);display:flex}
+.status-bar.success{background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3);display:flex}
+.status-bar.error{background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3);display:flex}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+#verify-section{display:none;margin-top:24px}
+#results-section{display:none;margin-top:24px}
+.room-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.room-card h4{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-transform:uppercase}
+.room-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.room-fields label{margin-top:0}
+.room-fields input,.room-fields select{margin-top:2px;padding:5px 8px;font-size:12px}
+.warn{padding:8px 12px;background:rgba(210,153,34,.1);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;font-size:12px;color:var(--yellow);margin-bottom:6px}
+.debug-box{background:rgba(110,64,201,.08);border:1px solid rgba(110,64,201,.3);border-radius:6px;padding:10px 14px;font-size:11px;color:#9B7FE8;font-family:monospace;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;background:var(--bg);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid rgba(48,54,61,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.qty{background:var(--accent);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700;font-size:12px;display:inline-block;min-width:36px;text-align:center}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid}
+.chip-b{color:var(--accent);border-color:var(--accent);background:rgba(26,133,255,.1)}
+.chip-g{color:var(--green);border-color:var(--green);background:rgba(63,185,80,.1)}
+.chip-y{color:var(--yellow);border-color:var(--yellow);background:rgba(210,153,34,.1)}
+.layout-img{width:100%;border-radius:8px;border:1px solid var(--border)}
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+.muted{color:var(--muted)}
+.conf-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.conf-bar{height:5px;background:var(--border);border-radius:3px;margin-bottom:14px}
+.conf-fill{height:100%;border-radius:3px;transition:width .5s}
+.section-title{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">⚡ Project V1</span>
+  <span class="badge-cv">LOCAL CV</span>
+  <span class="badge">ALPHA</span>
+  <span class="muted" style="margin-left:auto;font-size:12px">No external API · OpenCV · Instant analysis</span>
+</nav>
+
+<div class="container">
+  <div class="grid-2">
+
+    <!-- UPLOAD -->
+    <div class="card">
+      <h2><span class="step-num">1</span> Upload Floor Plan</h2>
+      <div class="upload-zone" id="drop-zone">
+        <input type="file" id="file-input" accept="image/*">
+        <div class="icon">🗺️</div>
+        <strong>Drop floor plan here or click to browse</strong>
+        <p style="color:var(--muted);margin-top:8px;font-size:13px">JPG · PNG · Hand-drawn · Blueprint · Sketch</p>
+      </div>
+      <img id="preview-img" alt="Preview">
+      <div id="upload-status" class="status-bar"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="card">
+      <h2><span class="step-num">2</span> Project Configuration</h2>
+
+      <label>Project Type</label>
+      <select id="project-type">
+        <option value="electrical">Electrical Only</option>
+        <option value="cctv">CCTV / Security Only</option>
+        <option value="both">Electrical + CCTV</option>
+      </select>
+
+      <label style="margin-top:14px">Building Dimensions <span class="muted">(optional but recommended for accuracy)</span></label>
+      <div class="dim-row">
+        <div>
+          <label>Width (metres)</label>
+          <input type="number" id="known-width"  placeholder="e.g. 15" min="1" max="500" step="0.5">
+        </div>
+        <div>
+          <label>Height / Depth (metres)</label>
+          <input type="number" id="known-height" placeholder="e.g. 12" min="1" max="500" step="0.5">
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px">
+        If left blank, width is assumed 15m. Enter actual site dimensions for accurate wire lengths.
+      </p>
+
+      <label>Project Name</label>
+      <input type="text" id="project-name" placeholder="e.g. Sharma Residence, Block A">
+
+      <button class="btn btn-primary btn-full" id="upload-btn" onclick="uploadPlan()" disabled>
+        🔍 Analyse Floor Plan
+      </button>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">
+        Runs locally · No API call · Typically &lt; 3 seconds
+      </p>
+    </div>
+  </div>
+
+  <!-- VERIFICATION -->
+  <div id="verify-section">
+    <hr class="divider">
+    <div class="card">
+      <h2><span class="step-num">3</span> Verify Detected Rooms — Correct Before Generating</h2>
+      <p class="muted" style="margin-bottom:16px;font-size:13px">
+        OpenCV detected the following rooms. Room names and dimensions may need correction
+        — especially for hand-drawn or low-contrast plans. Fix anything wrong, then confirm.
+      </p>
+      <div id="conf-block" style="display:none">
+        <div class="conf-row"><span>Detection Confidence</span><span id="conf-label">—</span></div>
+        <div class="conf-bar"><div class="conf-fill" id="conf-fill" style="width:0"></div></div>
+      </div>
+      <div id="warnings-list"></div>
+      <div id="debug-info"></div>
+      <div id="rooms-editor"></div>
+      <button class="btn btn-success btn-full" id="verify-btn" onclick="generateLayout()">
+        ✅ Confirm & Generate Electrical Layout
+      </button>
+      <div id="verify-status" class="status-bar"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-section">
+    <hr class="divider">
+    <div class="grid-2">
+      <div class="card">
+        <h2><span class="step-num">4</span> Generated Electrical Layout</h2>
+        <div id="summary-chips" class="chips"></div>
+        <img id="layout-img" class="layout-img" alt="Layout">
+        <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="downloadLayout()">
+          ⬇️ Download Layout PNG
+        </button>
+      </div>
+      <div class="card">
+        <h2>📋 Bill of Materials</h2>
+        <div id="bom-table"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let jobId = null, visionData = null;
+
+// FILE INPUT
+const fi = document.getElementById("file-input");
+const dz = document.getElementById("drop-zone");
+const pr = document.getElementById("preview-img");
+const ub = document.getElementById("upload-btn");
+
+fi.addEventListener("change", e => { if(e.target.files[0]) preview(e.target.files[0]); });
+["dragenter","dragover"].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add("drag"); }));
+["dragleave","drop"].forEach(e   => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove("drag"); }));
+dz.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if(f){ fi.files = e.dataTransfer.files; preview(f); }});
+
+function preview(f){
+  pr.src = URL.createObjectURL(f);
+  pr.style.display = "block";
+  ub.disabled = false;
+}
+
+// UPLOAD
+async function uploadPlan(){
+  const f = fi.files[0];
+  if(!f) return;
+  setStatus("upload-status","info","🔍 Analysing floor plan with OpenCV…");
+  ub.disabled = true;
+
+  const fd = new FormData();
+  fd.append("file", f);
+  fd.append("project_type", document.getElementById("project-type").value);
+  const w = document.getElementById("known-width").value;
+  const h = document.getElementById("known-height").value;
+  if(w) fd.append("known_width", w);
+  if(h) fd.append("known_height", h);
+
+  try {
+    const res  = await fetch("/upload", {method:"POST", body:fd});
+    const data = await res.json();
+
+    if(data.status === "failed"){
+      setStatus("upload-status","error","❌ Analysis failed: " + data.error);
+      ub.disabled = false; return;
+    }
+
+    jobId      = data.job_id;
+    visionData = data.vision_data;
+
+    const nr = data.vision_data.rooms?.length || 0;
+    const ne = data.vision_data.detected_elements?.length || 0;
+    setStatus("upload-status","success",
+      `✅ Detected ${nr} room${nr!==1?"s":""} and ${ne} element${ne!==1?"s":""}. Confidence: ${Math.round((data.vision_data.confidence||0)*100)}%. Verify below.`);
+
+    buildVerify(data.vision_data);
+    show("verify-section");
+    document.getElementById("verify-section").scrollIntoView({behavior:"smooth"});
+  } catch(err){
+    setStatus("upload-status","error","❌ " + err.message);
+    ub.disabled = false;
+  }
+}
+
+// BUILD VERIFICATION UI
+function buildVerify(vd){
+  // Confidence bar
+  if(vd.confidence !== undefined){
+    document.getElementById("conf-block").style.display = "block";
+    const pct = Math.round(vd.confidence * 100);
+    document.getElementById("conf-label").textContent = pct + "%";
+    const fill = document.getElementById("conf-fill");
+    fill.style.width = pct + "%";
+    fill.style.background = pct>=70 ? "var(--green)" : pct>=40 ? "var(--yellow)" : "var(--red)";
+  }
+
+  // Warnings
+  const wl = document.getElementById("warnings-list");
+  wl.innerHTML = "";
+  (vd.warnings||[]).forEach(w => {
+    const d = document.createElement("div");
+    d.className = "warn"; d.textContent = "⚠ " + w;
+    wl.appendChild(d);
+  });
+
+  // Debug info
+  if(vd._debug){
+    document.getElementById("debug-info").innerHTML =
+      `<div class="debug-box">OpenCV debug — image: ${vd._debug.image_px}  ·  scale: ${vd._debug.scale_mppx} m/px  ·  rooms found: ${vd._debug.rooms_found}</div>`;
+  }
+
+  // Rooms editor
+  const re = document.getElementById("rooms-editor");
+  re.innerHTML = `<div class="section-title">Detected Rooms (${(vd.rooms||[]).length}) — Edit if wrong</div>`;
+
+  const ROOM_TYPES = ["bedroom","living","kitchen","bathroom","office","store","corridor","hall","unknown"];
+
+  (vd.rooms||[]).forEach((room, i) => {
+    const card = document.createElement("div");
+    card.className = "room-card";
+    card.dataset.idx = i;
+
+    const typeOpts = ROOM_TYPES.map(t =>
+      `<option value="${t}" ${room.name===t?"selected":""}>${t}</option>`).join("");
+
+    card.innerHTML = `
+      <h4>Room ${i+1}</h4>
+      <div class="room-fields">
+        <div><label>Room Type</label>
+          <select data-field="name" style="margin-top:2px;padding:5px 8px;font-size:12px;width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px">${typeOpts}</select></div>
+        <div><label>Width (m)</label><input type="number" data-field="width"  value="${(room.width ||0).toFixed(1)}" step="0.1" min="0.5"></div>
+        <div><label>Height (m)</label><input type="number" data-field="height" value="${(room.height||0).toFixed(1)}" step="0.1" min="0.5"></div>
+        <div><label>Doors detected</label><input type="number" data-field="door_count" value="${(room.doors||[]).length}" min="0" max="4"></div>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Area: ${room.area_m2||"?"}m²  ·  Position: (${(room.x||0).toFixed(1)}, ${(room.y||0).toFixed(1)})  ·  Windows: ${(room.windows||[]).length}
+      </div>`;
+    re.appendChild(card);
+  });
+
+  // Elements
+  const elems = vd.detected_elements||[];
+  if(elems.length){
+    const counts = {};
+    elems.forEach(e => counts[e.type] = (counts[e.type]||0)+1);
+    const summary = Object.entries(counts).map(([k,v])=>`${v}× ${k}`).join(", ");
+    const d = document.createElement("div");
+    d.style.cssText = "margin-top:14px;padding:10px 14px;background:rgba(26,133,255,.08);border-radius:6px;font-size:12px;color:var(--muted)";
+    d.innerHTML = `<strong style="color:var(--accent)">Elements detected:</strong> ${summary}`;
+    re.appendChild(d);
+  }
+}
+
+// COLLECT VERIFIED DATA
+function collectVerified(){
+  const vd = JSON.parse(JSON.stringify(visionData));
+  document.querySelectorAll(".room-card").forEach((card, i) => {
+    if(!vd.rooms[i]) return;
+    const name  = card.querySelector('[data-field="name"]')?.value;
+    const w     = parseFloat(card.querySelector('[data-field="width"]')?.value);
+    const h     = parseFloat(card.querySelector('[data-field="height"]')?.value);
+    const doors = parseInt(card.querySelector('[data-field="door_count"]')?.value)||0;
+    if(name) vd.rooms[i].name = name;
+    if(!isNaN(w)) vd.rooms[i].width  = w;
+    if(!isNaN(h)) vd.rooms[i].height = h;
+    // Rebuild doors array to match count
+    if(doors === 0) vd.rooms[i].doors = [];
+    else if(vd.rooms[i].doors.length === 0 && doors > 0){
+      vd.rooms[i].doors = [{wall:"bottom", position: vd.rooms[i].width/2, width:0.9}];
+    }
+  });
+  return vd;
+}
+
+// GENERATE LAYOUT
+async function generateLayout(){
+  const vb = document.getElementById("verify-btn");
+  vb.disabled = true;
+  setStatus("verify-status","info","⚙️ Placing components, routing wire, building BOM…");
+
+  try {
+    const res  = await fetch(`/verify/${jobId}`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(collectVerified()),
+    });
+    const data = await res.json();
+
+    if(data.status !== "completed"){
+      setStatus("verify-status","error","❌ " + JSON.stringify(data));
+      vb.disabled = false; return;
+    }
+
+    setStatus("verify-status","success","✅ Layout generated!");
+    buildResults(data);
+    show("results-section");
+    document.getElementById("results-section").scrollIntoView({behavior:"smooth"});
+  } catch(err){
+    setStatus("verify-status","error","❌ " + err.message);
+    vb.disabled = false;
+  }
+}
+
+// BUILD RESULTS
+function buildResults(data){
+  const s = data.summary;
+  document.getElementById("summary-chips").innerHTML = `
+    <span class="chip chip-b">🏠 ${s.rooms} rooms</span>
+    <span class="chip chip-g">⚡ ${s.components} components</span>
+    <span class="chip chip-y">🔌 ${s.total_wire_m}m wire</span>
+    ${s.cameras>0?`<span class="chip chip-b">📷 ${s.cameras} cameras</span>`:""}
+    ${s.cameras>0?`<span class="chip chip-y">🔗 ${s.total_cat6_m}m CAT6</span>`:""}`;
+
+  document.getElementById("layout-img").src = data.layout_url + "?t=" + Date.now();
+
+  const rows = data.bom.map(it=>`<tr>
+    <td>${it.item}</td>
+    <td><span class="qty">${it.qty}</span></td>
+    <td style="color:var(--muted)">${it.unit}</td></tr>`).join("");
+  document.getElementById("bom-table").innerHTML =
+    `<table><thead><tr><th>Item</th><th>Qty</th><th>Unit</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function downloadLayout(){
+  if(!jobId) return;
+  const a = document.createElement("a");
+  a.href = `/outputs/${jobId}_layout.png`;
+  a.download = `layout_${jobId}.png`;
+  a.click();
+}
+
+function show(id){ document.getElementById(id).style.display="block"; }
+
+function setStatus(id, type, msg){
+  const el = document.getElementById(id);
+  el.className = "status-bar " + type;
+  el.innerHTML = (type==="info"?'<div class="spinner"></div>':"") + `<span>${msg}</span>`;
+}
+</script>
+</body>
+</html>
