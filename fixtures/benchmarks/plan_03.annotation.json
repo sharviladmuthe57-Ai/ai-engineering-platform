@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "plan_03",
+  "fixture": {
+    "file": "plan_03.png",
+    "sha256": "3F86FCA82DE01B7C3EAC4DF590507375FBB67198D730442EA86038B71057D6B9",
+    "pixel_dimensions": {
+      "width": 1217,
+      "height": 1175
+    },
+    "integrity": "byte-identical copy of user supplied PNG"
+  },
+  "drawing_dimensions": {
+    "status": "annotated_from_visible_drawing_text",
+    "value": "60' × 60'",
+    "unit": "feet",
+    "used_as_pipeline_input": false
+  },
+  "annotations": {
+    "expected": {
+      "rooms": [
+        {
+          "id": "expected_room_1",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_2",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_3",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_4",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_5",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_6",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_7",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_8",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_9",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_10",
+          "type": "kitchen",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_11",
+          "type": "dining",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_12",
+          "type": "living",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_13",
+          "type": "store",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_14",
+          "type": "unknown",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_15",
+          "type": "unknown",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_16",
+          "type": "verandah",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_17",
+          "type": "garage",
+          "status": "expected"
+        }
+      ],
+      "openings": []
+    },
+    "accepted": {
+      "doors": [],
+      "windows": []
+    },
+    "rejected": {
+      "doors": [],
+      "windows": []
+    },
+    "uncertain": {
+      "openings": [
+        {
+          "type": "door",
+          "status": "uncertain",
+          "observation": "Several clearly drawn door swings exist, including shop frontage and interior rooms."
+        },
+        {
+          "type": "window",
+          "status": "uncertain",
+          "observation": "Perimeter window bands are visible."
+        },
+        {
+          "type": "room_type",
+          "status": "uncertain",
+          "observation": "MULTIPURPOSE ROOM and SHOP have no canonical electrical-rule type yet and are annotated as unknown."
+        }
+      ],
+      "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
+    }
+  }
+}
