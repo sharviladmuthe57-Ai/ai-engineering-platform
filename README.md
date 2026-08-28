@@ -1,68 +1,74 @@
-# Project V1 — AI-Native Electrical Planning & Quotation Platform
+# AI Engineering Platform — V1
 
-## What this is
-Upload a floor plan → AI reads it → places electrical/CCTV components →
-routes wiring → generates BOM → engineer verifies → layout PNG output.
+A local, manual-assist prototype for electrical-plan generation from floor-plan images.
 
-## Stack
-- **Backend**: Python + FastAPI
-- **AI Vision**: Claude claude-sonnet-4-6 (multimodal)
-- **Geometry**: Shapely + NetworkX
-- **Output**: Matplotlib
-- **Frontend**: Vanilla HTML/JS (no build step)
+## Implemented workflow
 
-## Setup
+```text
+Image upload
+→ local OpenCV room-region extraction
+→ additive door/window candidates
+→ engineer verification
+→ accepted candidates adapted to legacy room openings
+→ deterministic electrical placement and L-path routing
+→ PNG electrical layout and BOM
+```
+
+The electrical engine still consumes the established legacy room format:
+`rooms[].doors` and `rooms[].windows`. Opening candidates are intentionally
+separate and do not influence electrical placement until an engineer accepts
+them in the verification screen.
+
+## Current architecture
+
+- `app.py` — FastAPI upload, job persistence, verification, layout/BOM APIs.
+- `core/cv_analyzer.py` — OpenCV preprocessing, wall-mask and room-region
+  extraction, best-effort OCR, legacy openings, and additive candidates.
+- `core/openings.py` — wall-mask boundary-gap candidate extraction and the
+  verified-candidate-to-legacy adapter.
+- `core/rules_engine.py` — deterministic per-room component rules.
+- `core/geometry.py` — component placement, Manhattan routing, BOM.
+- `core/renderer.py` and `core/symbols.py` — Matplotlib PNG rendering.
+- `core/ocr_reader.py` — standalone multi-variant Tesseract helper; it is
+  not currently wired into the upload route.
+- `static/index.html` — upload and verification UI.
+
+## Opening candidates
+
+Each candidate records its id, type, room id, image-pixel position, wall side,
+pixel width, approximate metric width, transparent heuristic confidence,
+detection method/provenance, and verification status.
+
+The current detector finds boundary gaps in the existing morphological wall
+mask. It is a candidate generator, not a final architectural-opening detector:
+it does not infer door swings or distinguish all interior/exterior opening
+semantics. Pending/rejected candidates never modify the electrical pipeline.
+
+## Run locally
 
 ```bash
-# 1. Clone / copy project-v1 folder
-
-# 2. Install dependencies
 pip install -r requirements.txt
-
-# 3. Set your Anthropic API key
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# 4. Run
 python -m uvicorn app:app --reload --port 8000
-
-# 5. Open browser
-http://localhost:8000
 ```
 
-## Folder structure
-```
-project-v1/
-├── app.py              ← FastAPI backend (all API routes)
-├── requirements.txt
-├── core/
-│   ├── vision.py       ← Layer 1: floor plan → JSON via Claude vision
-│   ├── geometry.py     ← Layer 2+3: component placement + wire routing
-│   └── renderer.py     ← Layer 4: layout PNG generation
-├── static/
-│   └── index.html      ← Full frontend (upload + verification screen + results)
-├── uploads/            ← Uploaded floor plan images (auto-created)
-├── outputs/            ← Generated layout PNGs (auto-created)
-└── jobs/               ← Job state files as JSON (auto-created)
-```
+Open http://localhost:8000.
 
-## API Endpoints
-```
-POST /upload            Upload floor plan, get vision extraction + job_id
-POST /verify/{job_id}   Submit verified room data, get layout + BOM
-GET  /layout/{job_id}   Download layout PNG
-GET  /bom/{job_id}      Get BOM as JSON
-GET  /status/{job_id}   Check job status
-```
+The UI accepts raster image files. PDF ingestion, precise polygons/walls,
+editable CAD geometry, and 3D visualization are not implemented yet.
 
-## Workflow (V1.0 — Manual Assist Mode)
-1. User uploads floor plan
-2. Claude vision API reads it → extracts rooms, walls, doors, elements
-3. Engineer sees verification screen — corrects any AI mistakes
-4. Engineer confirms → geometry engine places components + routes wiring
-5. BOM generated automatically from routing output
-6. Layout PNG downloaded
+## APIs
 
-## What's next (V1.1 → V1.2)
-- V1.1: Improve automated component placement (remove need for manual correction on standard plans)
-- V1.2: Dijkstra-based optimal multi-room wire routing
-- THEN: Go sell. Do not build more until first paying customer.
+- `POST /upload` — store an image and return rooms, legacy openings, and
+  pending opening candidates.
+- `GET /openings/{job_id}` — return candidates for a stored job.
+- `POST /verify/{job_id}` — apply verifier edits; accepted candidates are
+  adapted immediately before the unchanged electrical pipeline runs.
+- `GET /layout/{job_id}`, `GET /bom/{job_id}`, `GET /status/{job_id}`.
+- `GET /health`.
+
+## Tests and fixtures
+
+Run `python -m unittest discover -s tests -v`.
+
+`fixtures/benchmarks/` is reserved for versioned, consented benchmark plans
+and expected annotations. No real plans are committed yet.
