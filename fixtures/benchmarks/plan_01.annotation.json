@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "plan_01",
+  "fixture": {
+    "file": "plan_01.png",
+    "sha256": "46D833D7662F4A57ADCD1ED0D1DF6A5661CE17C45AA40BC341AB5F819FC48B6A",
+    "pixel_dimensions": {
+      "width": 824,
+      "height": 582
+    },
+    "integrity": "byte-identical copy of user supplied PNG"
+  },
+  "drawing_dimensions": {
+    "status": "annotated_from_visible_drawing_text",
+    "value": "50' × 40'",
+    "unit": "feet",
+    "used_as_pipeline_input": false
+  },
+  "annotations": {
+    "expected": {
+      "rooms": [
+        {
+          "id": "expected_room_1",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_2",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_3",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_4",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_5",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_6",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_7",
+          "type": "kitchen",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_8",
+          "type": "living",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_9",
+          "type": "store",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_10",
+          "type": "office",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_11",
+          "type": "verandah",
+          "status": "expected"
+        }
+      ],
+      "openings": []
+    },
+    "accepted": {
+      "doors": [],
+      "windows": []
+    },
+    "rejected": {
+      "doors": [],
+      "windows": []
+    },
+    "uncertain": {
+      "openings": [
+        {
+          "type": "door",
+          "status": "uncertain",
+          "observation": "Multiple dashed door swings are visible."
+        },
+        {
+          "type": "window",
+          "status": "uncertain",
+          "observation": "Exterior window marks are visible along the perimeter."
+        }
+      ],
+      "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
+    }
+  }
+}
