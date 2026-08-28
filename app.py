@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from core.cv_analyzer import analyze_floor_plan   # ← local CV, no API
 from core.geometry    import generate_layout
 from core.renderer    import render_layout
+from core.openings    import apply_verified_openings_to_rooms
 
 # ── APP ──────────────────────────────────────────────────────
 app = FastAPI(title="Project V1", version="1.0.0")
@@ -124,6 +125,17 @@ async def verify(jid: str, verified_data: dict):
     vision_data  = verified_data if verified_data.get("rooms") else job["vision_data"]
     project_type = job["project_type"]
 
+    # Candidate openings are inert until the verifier accepts them. The adapter
+    # writes accepted openings into the established rooms[].doors/windows shape
+    # immediately before the unchanged electrical pipeline is called.
+    opening_candidates = vision_data.get(
+        "opening_candidates", job["vision_data"].get("opening_candidates", [])
+    )
+    vision_data = dict(vision_data)
+    vision_data["rooms"] = apply_verified_openings_to_rooms(
+        vision_data.get("rooms", []), opening_candidates
+    )
+
     layout = generate_layout(vision_data, project_type)
 
     out_png = OUTPUTS / f"{jid}_layout.png"
@@ -151,6 +163,16 @@ async def verify(jid: str, verified_data: dict):
             "warnings"     : layout["warnings"],
         },
     })
+
+
+@app.get("/openings/{jid}")
+def get_openings(jid: str):
+    """Return additive opening candidates for the verification UI."""
+    job = load_job(jid)
+    return {
+        "job_id": jid,
+        "opening_candidates": job["vision_data"].get("opening_candidates", []),
+    }
 
 
 @app.get("/layout/{jid}")
