@@ -146,6 +146,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
       <div id="warnings-list"></div>
       <div id="debug-info"></div>
+      <div id="opening-candidates"></div>
       <div id="rooms-editor"></div>
       <button class="btn btn-success btn-full" id="verify-btn" onclick="generateLayout()">
         ✅ Confirm & Generate Electrical Layout
@@ -262,6 +263,8 @@ function buildVerify(vd){
       `<div class="debug-box">OpenCV debug — image: ${vd._debug.image_px}  ·  scale: ${vd._debug.scale_mppx} m/px  ·  rooms found: ${vd._debug.rooms_found}</div>`;
   }
 
+  buildOpeningCandidates(vd.opening_candidates || []);
+
   // Rooms editor
   const re = document.getElementById("rooms-editor");
   re.innerHTML = `<div class="section-title">Detected Rooms (${(vd.rooms||[]).length}) — Edit if wrong</div>`;
@@ -304,6 +307,35 @@ function buildVerify(vd){
   }
 }
 
+
+function buildOpeningCandidates(candidates){
+  const host = document.getElementById("opening-candidates");
+  if(!candidates.length){
+    host.innerHTML = '<div class="section-title">Architectural openings</div><p class="muted" style="font-size:12px;margin-bottom:12px">No opening candidates detected. Existing legacy doors/windows remain unchanged.</p>';
+    return;
+  }
+  const card = c => '<div class="room-card opening-card" data-opening-id="' + c.id + '">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h4 style="margin:0">' + c.type.toUpperCase() + ' · ' + c.room_id + '</h4>' +
+    '<span class="qty" style="background:' + (c.confidence >= .7 ? 'var(--green)' : 'var(--yellow)') + '">' + Math.round(c.confidence * 100) + '%</span></div>' +
+    '<div class="room-fields" style="margin-top:8px"><div><label>Wall</label><select data-opening-field="side"><option value="top">top</option><option value="bottom">bottom</option><option value="left">left</option><option value="right">right</option></select></div>' +
+    '<div><label>Width (px)</label><input type="number" min="1" data-opening-field="width_px" value="' + c.width_px + '"></div>' +
+    '<div><label>Offset (px)</label><input type="number" min="0" data-opening-field="offset_px" value="' + c.offset_px + '"></div>' +
+    '<div><label>Verification</label><select data-opening-field="verification_status"><option value="pending">PENDING</option><option value="accepted">ACCEPT</option><option value="rejected">REJECT</option></select></div></div>' +
+    '<div style="margin-top:8px;font-size:11px;color:var(--muted)">Method: ' + c.detection_method + ' · Approx. width: ' + c.approx_width_m + 'm · Position: (' + c.position_px.x + ', ' + c.position_px.y + ') px</div></div>';
+  const doors = candidates.filter(c => c.type === "door").map(card).join("");
+  const windows = candidates.filter(c => c.type === "window").map(card).join("");
+  host.innerHTML = '<div class="section-title">Architectural Opening Candidates — verify before use</div>' +
+    '<p class="muted" style="font-size:12px;margin-bottom:10px">Only ACCEPTED candidates are adapted into the legacy electrical workflow. Pending and rejected candidates do not change it.</p>' +
+    '<div class="section-title">Doors (' + candidates.filter(c => c.type === "door").length + ')</div>' + doors +
+    '<div class="section-title">Windows (' + candidates.filter(c => c.type === "window").length + ')</div>' + windows;
+  candidates.forEach(c => {
+    const cardEl = host.querySelector('[data-opening-id="' + c.id + '"]');
+    if(!cardEl) return;
+    cardEl.querySelector('[data-opening-field="side"]').value = c.side;
+    cardEl.querySelector('[data-opening-field="verification_status"]').value = c.verification_status || "pending";
+  });
+}
+
 // COLLECT VERIFIED DATA
 function collectVerified(){
   const vd = JSON.parse(JSON.stringify(visionData));
@@ -321,6 +353,16 @@ function collectVerified(){
     else if(vd.rooms[i].doors.length === 0 && doors > 0){
       vd.rooms[i].doors = [{wall:"bottom", position: vd.rooms[i].width/2, width:0.9}];
     }
+  });
+
+  document.querySelectorAll(".opening-card").forEach(card => {
+    const candidate = (vd.opening_candidates || []).find(c => c.id === card.dataset.openingId);
+    if(!candidate) return;
+    candidate.side = card.querySelector('[data-opening-field="side"]').value;
+    candidate.wall_location = candidate.side;
+    candidate.width_px = parseFloat(card.querySelector('[data-opening-field="width_px"]').value) || candidate.width_px;
+    candidate.offset_px = parseFloat(card.querySelector('[data-opening-field="offset_px"]').value) || candidate.offset_px;
+    candidate.verification_status = card.querySelector('[data-opening-field="verification_status"]').value;
   });
   return vd;
 }
