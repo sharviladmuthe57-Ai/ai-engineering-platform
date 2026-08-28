@@ -16,6 +16,8 @@ import numpy as np
 import re
 from pathlib import Path
 
+from .openings import extract_opening_candidates
+
 try:
     import pytesseract
     OCR_AVAILABLE = True
@@ -97,7 +99,12 @@ def analyze_floor_plan(image_path: str,
     # 7. Elements (CCTV cameras etc.)
     elements = detect_elements(img, gray, scale, H)
 
-    # 8. Confidence
+    # 8. Opening candidates are additive; legacy room openings remain intact.
+    opening_candidates = extract_opening_candidates(
+        wall_mask, regions, scale_x_m_per_px=scale, scale_y_m_per_px=scale_y
+    )
+
+    # 9. Confidence
     n_ocr = sum(1 for r in rooms if r["name"] != "unknown")
     conf  = min(0.92, 0.45 + 0.07*len(rooms) + 0.05*n_ocr)
 
@@ -114,6 +121,7 @@ def analyze_floor_plan(image_path: str,
             },
             "rooms"            : rooms,
             "detected_elements": elements,
+            "opening_candidates": opening_candidates,
             "electrical_hints" : [],
             "warnings"         : warnings,
             "_debug"           : {
@@ -122,6 +130,7 @@ def analyze_floor_plan(image_path: str,
                 "regions_found": len(regions),
                 "ocr_labels"   : len(ocr_labels),
                 "rooms_final"  : len(rooms),
+                "opening_candidates": len(opening_candidates),
             },
         }
     }
