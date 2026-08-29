@@ -1,0 +1,2310 @@
+{
+  "plan_id": "plan_03",
+  "success": true,
+  "dimensions_and_scale": {
+    "drawing_dimensions": {
+      "status": "annotated_from_visible_drawing_text",
+      "value": "60' \u00d7 60'",
+      "unit": "feet",
+      "used_as_pipeline_input": false
+    },
+    "detected_site": {
+      "total_width": 12.0,
+      "total_height": 11.6,
+      "has_compound": false
+    },
+    "detected_scale_mppx": 0.00986,
+    "scale_note": "The runner does not convert annotated feet labels into metres."
+  },
+  "detected_rooms": [
+    {
+      "id": "room_1",
+      "name": "living",
+      "x": 1.49,
+      "y": 4.02,
+      "width": 8.07,
+      "height": 4.54,
+      "area_m2": 36.6,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 2.8,
+          "width": 0.7
+        },
+        {
+          "wall": "right",
+          "position": 0.24,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 0.24,
+          "width": 0.48
+        },
+        {
+          "wall": "right",
+          "position": 3.74,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_2",
+      "name": "bedroom",
+      "x": 1.14,
+      "y": 1.15,
+      "width": 4.19,
+      "height": 2.65,
+      "area_m2": 11.1,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.35,
+          "width": 0.7
+        }
+      ],
+      "windows": []
+    },
+    {
+      "id": "room_3",
+      "name": "bedroom",
+      "x": 8.26,
+      "y": 0.91,
+      "width": 3.2,
+      "height": 2.9,
+      "area_m2": 9.3,
+      "shape": "rectangle",
+      "doors": [],
+      "windows": []
+    },
+    {
+      "id": "room_4",
+      "name": "bedroom",
+      "x": 5.54,
+      "y": 0.79,
+      "width": 2.51,
+      "height": 3.02,
+      "area_m2": 7.6,
+      "shape": "rectangle",
+      "doors": [],
+      "windows": []
+    },
+    {
+      "id": "room_5",
+      "name": "kitchen",
+      "x": 1.14,
+      "y": 9.06,
+      "width": 2.5,
+      "height": 2.17,
+      "area_m2": 5.4,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "right",
+          "position": 2.07,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 2.07,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_6",
+      "name": "kitchen",
+      "x": 5.46,
+      "y": 9.06,
+      "width": 2.5,
+      "height": 2.17,
+      "area_m2": 5.4,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "left",
+          "position": 2.07,
+          "width": 0.7
+        }
+      ],
+      "windows": []
+    },
+    {
+      "id": "room_7",
+      "name": "kitchen",
+      "x": 9.07,
+      "y": 9.06,
+      "width": 2.4,
+      "height": 2.17,
+      "area_m2": 5.2,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.14,
+          "width": 0.7
+        }
+      ],
+      "windows": []
+    },
+    {
+      "id": "room_8",
+      "name": "corridor",
+      "x": 0.5,
+      "y": 0.91,
+      "width": 0.5,
+      "height": 10.32,
+      "area_m2": 4.4,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.22,
+          "width": 0.7
+        },
+        {
+          "wall": "top",
+          "position": 0.22,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.22,
+          "width": 0.43
+        }
+      ]
+    },
+    {
+      "id": "room_9",
+      "name": "kitchen",
+      "x": 9.07,
+      "y": 6.07,
+      "width": 2.4,
+      "height": 2.15,
+      "area_m2": 5.2,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "top",
+          "position": 0.24,
+          "width": 0.7
+        },
+        {
+          "wall": "left",
+          "position": 0.07,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.24,
+          "width": 0.48
+        }
+      ]
+    },
+    {
+      "id": "room_10",
+      "name": "corridor",
+      "x": 1.14,
+      "y": 0.28,
+      "width": 7.02,
+      "height": 0.5,
+      "area_m2": 2.9,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "left",
+          "position": 0.22,
+          "width": 0.7
+        },
+        {
+          "wall": "right",
+          "position": 0.22,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 0.22,
+          "width": 0.41
+        }
+      ]
+    },
+    {
+      "id": "room_11",
+      "name": "bedroom",
+      "x": 0.2,
+      "y": 0.19,
+      "width": 0.85,
+      "height": 11.21,
+      "area_m2": 9.5,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.42,
+          "width": 0.85
+        },
+        {
+          "wall": "top",
+          "position": 0.42,
+          "width": 0.85
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 10.95,
+          "width": 0.51
+        }
+      ]
+    },
+    {
+      "id": "room_12",
+      "name": "corridor",
+      "x": 11.57,
+      "y": 0.19,
+      "width": 0.5,
+      "height": 11.21,
+      "area_m2": 2.7,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.12,
+          "width": 0.7
+        },
+        {
+          "wall": "top",
+          "position": 0.12,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.18,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_13",
+      "name": "bathroom",
+      "x": 9.55,
+      "y": 4.02,
+      "width": 1.91,
+      "height": 0.94,
+      "area_m2": 1.8,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.27,
+          "width": 0.7
+        },
+        {
+          "wall": "left",
+          "position": 0.14,
+          "width": 0.7
+        }
+      ],
+      "windows": []
+    },
+    {
+      "id": "room_14",
+      "name": "corridor",
+      "x": 1.14,
+      "y": 4.02,
+      "width": 0.5,
+      "height": 2.76,
+      "area_m2": 0.7,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.12,
+          "width": 0.7
+        },
+        {
+          "wall": "top",
+          "position": 0.12,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.12,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_15",
+      "name": "bathroom",
+      "x": 4.19,
+      "y": 8.73,
+      "width": 0.72,
+      "height": 0.83,
+      "area_m2": 0.6,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.36,
+          "width": 0.72
+        },
+        {
+          "wall": "top",
+          "position": 0.36,
+          "width": 0.71
+        }
+      ],
+      "windows": []
+    },
+    {
+      "id": "room_16",
+      "name": "bathroom",
+      "x": 9.07,
+      "y": 4.02,
+      "width": 1.02,
+      "height": 0.5,
+      "area_m2": 0.5,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "top",
+          "position": 0.31,
+          "width": 0.7
+        },
+        {
+          "wall": "left",
+          "position": 0.29,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.31,
+          "width": 0.4
+        },
+        {
+          "wall": "right",
+          "position": 0.37,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_17",
+      "name": "corridor",
+      "x": 10.09,
+      "y": 0.44,
+      "width": 1.38,
+      "height": 0.5,
+      "area_m2": 0.3,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "left",
+          "position": 0.12,
+          "width": 0.7
+        },
+        {
+          "wall": "right",
+          "position": 0.12,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 0.12,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_18",
+      "name": "corridor",
+      "x": 8.26,
+      "y": 0.44,
+      "width": 1.37,
+      "height": 0.5,
+      "area_m2": 0.3,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "left",
+          "position": 0.12,
+          "width": 0.7
+        },
+        {
+          "wall": "right",
+          "position": 0.12,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "right",
+          "position": 0.12,
+          "width": 0.4
+        }
+      ]
+    },
+    {
+      "id": "room_19",
+      "name": "corridor",
+      "x": 1.14,
+      "y": 7.36,
+      "width": 0.5,
+      "height": 1.2,
+      "area_m2": 0.3,
+      "shape": "rectangle",
+      "doors": [
+        {
+          "wall": "bottom",
+          "position": 0.12,
+          "width": 0.7
+        },
+        {
+          "wall": "top",
+          "position": 0.12,
+          "width": 0.7
+        }
+      ],
+      "windows": [
+        {
+          "wall": "top",
+          "position": 0.12,
+          "width": 0.4
+        }
+      ]
+    }
+  ],
+  "detected_door_candidates": [
+    {
+      "id": "opening_door_1_bottom_268_299",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 434.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 283.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_338_370",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 505.0,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 354.0,
+      "width_px": 32,
+      "approx_width_m": 0.32,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_382_476",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 580.0,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 429.0,
+      "width_px": 94,
+      "approx_width_m": 0.93,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.62,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_488_519",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 654.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 503.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_558_589",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 724.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 573.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_600_700",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 801.0,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 650.0,
+      "width_px": 100,
+      "approx_width_m": 0.99,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.59,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_718_749",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 884.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 733.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_bottom_769_818",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 944.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 793.5,
+      "width_px": 49,
+      "approx_width_m": 0.48,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.8,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_right_0_49",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 331.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 24.5,
+      "width_px": 49,
+      "approx_width_m": 0.48,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.8,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_right_365_394",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 686.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 379.5,
+      "width_px": 29,
+      "approx_width_m": 0.29,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.69,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_1_right_416_460",
+      "type": "door",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 745.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 438.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.77,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_20_51",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 151.5,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 35.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_55_86",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 186.5,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 70.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_90_121",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 221.5,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 105.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_161_193",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 293.0,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 177.0,
+      "width_px": 32,
+      "approx_width_m": 0.32,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_197_227",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 328.0,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 212.0,
+      "width_px": 30,
+      "approx_width_m": 0.3,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.69,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_231_263",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 363.0,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 247.0,
+      "width_px": 32,
+      "approx_width_m": 0.32,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_303_334",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 434.5,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 318.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_338_369",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 469.5,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 353.5,
+      "width_px": 31,
+      "approx_width_m": 0.31,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_2_bottom_373_405",
+      "type": "door",
+      "room_id": "room_2",
+      "position_px": {
+        "x": 505.0,
+        "y": 1058
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 389.0,
+      "width_px": 32,
+      "approx_width_m": 0.32,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.7,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 1
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_5_right_199_220",
+      "type": "door",
+      "room_id": "room_5",
+      "position_px": {
+        "x": 370,
+        "y": 245.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 209.5,
+      "width_px": 21,
+      "approx_width_m": 0.21,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.64,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 4
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_6_left_199_220",
+      "type": "door",
+      "room_id": "room_6",
+      "position_px": {
+        "x": 554,
+        "y": 245.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 209.5,
+      "width_px": 21,
+      "approx_width_m": 0.21,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.64,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 5
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_7_bottom_3_26",
+      "type": "door",
+      "room_id": "room_7",
+      "position_px": {
+        "x": 934.5,
+        "y": 256
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 14.5,
+      "width_px": 23,
+      "approx_width_m": 0.23,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.65,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 6
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_8_top_0_44",
+      "type": "door",
+      "room_id": "room_8",
+      "position_px": {
+        "x": 73.0,
+        "y": 36
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 22.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.77,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 7
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_8_bottom_0_44",
+      "type": "door",
+      "room_id": "room_8",
+      "position_px": {
+        "x": 73.0,
+        "y": 1083
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 22.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.77,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 7
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_9_top_0_49",
+      "type": "door",
+      "room_id": "room_9",
+      "position_px": {
+        "x": 944.5,
+        "y": 341
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 24.5,
+      "width_px": 49,
+      "approx_width_m": 0.48,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.8,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 8
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_9_left_0_15",
+      "type": "door",
+      "room_id": "room_9",
+      "position_px": {
+        "x": 920,
+        "y": 348.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 7.5,
+      "width_px": 15,
+      "approx_width_m": 0.15,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.61,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 8
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_9_left_33_66",
+      "type": "door",
+      "room_id": "room_9",
+      "position_px": {
+        "x": 920,
+        "y": 390.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 49.5,
+      "width_px": 33,
+      "approx_width_m": 0.33,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.71,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 8
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_10_left_1_43",
+      "type": "door",
+      "room_id": "room_10",
+      "position_px": {
+        "x": 116,
+        "y": 1126.0
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 22.0,
+      "width_px": 42,
+      "approx_width_m": 0.41,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.76,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 9
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_10_right_1_43",
+      "type": "door",
+      "room_id": "room_10",
+      "position_px": {
+        "x": 828,
+        "y": 1126.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 22.0,
+      "width_px": 42,
+      "approx_width_m": 0.41,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.76,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 9
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_11_top_0_86",
+      "type": "door",
+      "room_id": "room_11",
+      "position_px": {
+        "x": 63.0,
+        "y": 19
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 43.0,
+      "width_px": 86,
+      "approx_width_m": 0.85,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.67,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 10
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_11_bottom_0_86",
+      "type": "door",
+      "room_id": "room_11",
+      "position_px": {
+        "x": 63.0,
+        "y": 1156
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 43.0,
+      "width_px": 86,
+      "approx_width_m": 0.85,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.67,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 10
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_11_right_1085_1137",
+      "type": "door",
+      "room_id": "room_11",
+      "position_px": {
+        "x": 106,
+        "y": 1130.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 1111.0,
+      "width_px": 52,
+      "approx_width_m": 0.51,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.82,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 10
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_12_top_0_24",
+      "type": "door",
+      "room_id": "room_12",
+      "position_px": {
+        "x": 1185.0,
+        "y": 19
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.0,
+      "width_px": 24,
+      "approx_width_m": 0.24,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 11
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_12_bottom_0_24",
+      "type": "door",
+      "room_id": "room_12",
+      "position_px": {
+        "x": 1185.0,
+        "y": 1156
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 12.0,
+      "width_px": 24,
+      "approx_width_m": 0.24,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 11
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_12_left_1085_1137",
+      "type": "door",
+      "room_id": "room_12",
+      "position_px": {
+        "x": 1173,
+        "y": 1130.0
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 1111.0,
+      "width_px": 52,
+      "approx_width_m": 0.51,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.82,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 11
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_13_bottom_0_54",
+      "type": "door",
+      "room_id": "room_13",
+      "position_px": {
+        "x": 996.0,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 27.0,
+      "width_px": 54,
+      "approx_width_m": 0.53,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.83,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 12
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_13_bottom_101_194",
+      "type": "door",
+      "room_id": "room_13",
+      "position_px": {
+        "x": 1116.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 147.5,
+      "width_px": 93,
+      "approx_width_m": 0.92,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.63,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 12
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_13_left_0_29",
+      "type": "door",
+      "room_id": "room_13",
+      "position_px": {
+        "x": 969,
+        "y": 686.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 14.5,
+      "width_px": 29,
+      "approx_width_m": 0.29,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.69,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 12
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_13_left_51_95",
+      "type": "door",
+      "room_id": "room_13",
+      "position_px": {
+        "x": 969,
+        "y": 745.0
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 73.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.77,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 12
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_13_right_0_95",
+      "type": "door",
+      "room_id": "room_13",
+      "position_px": {
+        "x": 1163,
+        "y": 719.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 47.5,
+      "width_px": 95,
+      "approx_width_m": 0.94,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.62,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 12
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_14_top_0_25",
+      "type": "door",
+      "room_id": "room_14",
+      "position_px": {
+        "x": 128.5,
+        "y": 487
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 13
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_14_bottom_0_25",
+      "type": "door",
+      "room_id": "room_14",
+      "position_px": {
+        "x": 128.5,
+        "y": 767
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 13
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_15_top_1_73",
+      "type": "door",
+      "room_id": "room_15",
+      "position_px": {
+        "x": 462.0,
+        "y": 206
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 37.0,
+      "width_px": 72,
+      "approx_width_m": 0.71,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.75,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 14
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_15_bottom_0_73",
+      "type": "door",
+      "room_id": "room_15",
+      "position_px": {
+        "x": 461.5,
+        "y": 290
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 36.5,
+      "width_px": 73,
+      "approx_width_m": 0.72,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.74,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 14
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_15_left_0_84",
+      "type": "door",
+      "room_id": "room_15",
+      "position_px": {
+        "x": 425,
+        "y": 248.0
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 42.0,
+      "width_px": 84,
+      "approx_width_m": 0.83,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.68,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 14
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_15_right_0_84",
+      "type": "door",
+      "room_id": "room_15",
+      "position_px": {
+        "x": 498,
+        "y": 248.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 42.0,
+      "width_px": 84,
+      "approx_width_m": 0.83,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.68,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 14
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_16_top_20_43",
+      "type": "door",
+      "room_id": "room_16",
+      "position_px": {
+        "x": 951.5,
+        "y": 718
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 31.5,
+      "width_px": 23,
+      "approx_width_m": 0.23,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.65,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 15
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_16_left_10_49",
+      "type": "door",
+      "room_id": "room_16",
+      "position_px": {
+        "x": 920,
+        "y": 747.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 29.5,
+      "width_px": 39,
+      "approx_width_m": 0.38,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.74,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 15
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_16_right_27_49",
+      "type": "door",
+      "room_id": "room_16",
+      "position_px": {
+        "x": 1023,
+        "y": 756.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 38.0,
+      "width_px": 22,
+      "approx_width_m": 0.22,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.65,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 15
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_17_left_0_25",
+      "type": "door",
+      "room_id": "room_17",
+      "position_px": {
+        "x": 1023,
+        "y": 1117.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 16
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_17_right_0_25",
+      "type": "door",
+      "room_id": "room_17",
+      "position_px": {
+        "x": 1163,
+        "y": 1117.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 16
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_18_left_0_25",
+      "type": "door",
+      "room_id": "room_18",
+      "position_px": {
+        "x": 838,
+        "y": 1117.5
+      },
+      "side": "left",
+      "wall_location": "left",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 17
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_18_right_0_25",
+      "type": "door",
+      "room_id": "room_18",
+      "position_px": {
+        "x": 977,
+        "y": 1117.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 17
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_19_top_0_25",
+      "type": "door",
+      "room_id": "room_19",
+      "position_px": {
+        "x": 128.5,
+        "y": 307
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 18
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_door_19_bottom_0_25",
+      "type": "door",
+      "room_id": "room_19",
+      "position_px": {
+        "x": 128.5,
+        "y": 429
+      },
+      "side": "bottom",
+      "wall_location": "bottom",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.66,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 18
+      },
+      "verification_status": "pending"
+    }
+  ],
+  "detected_window_candidates": [
+    {
+      "id": "opening_window_1_right_0_49",
+      "type": "window",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 331.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 24.5,
+      "width_px": 49,
+      "approx_width_m": 0.48,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.82,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_1_right_365_394",
+      "type": "window",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 686.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 379.5,
+      "width_px": 29,
+      "approx_width_m": 0.29,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.82,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_1_right_416_460",
+      "type": "window",
+      "room_id": "room_1",
+      "position_px": {
+        "x": 969,
+        "y": 745.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 438.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.86,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 0
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_5_right_199_220",
+      "type": "window",
+      "room_id": "room_5",
+      "position_px": {
+        "x": 370,
+        "y": 245.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 209.5,
+      "width_px": 21,
+      "approx_width_m": 0.21,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.75,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 4
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_8_top_0_44",
+      "type": "window",
+      "room_id": "room_8",
+      "position_px": {
+        "x": 73.0,
+        "y": 36
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 22.0,
+      "width_px": 44,
+      "approx_width_m": 0.43,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.86,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 7
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_9_top_0_49",
+      "type": "window",
+      "room_id": "room_9",
+      "position_px": {
+        "x": 944.5,
+        "y": 341
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 24.5,
+      "width_px": 49,
+      "approx_width_m": 0.48,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.82,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 8
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_10_right_1_43",
+      "type": "window",
+      "room_id": "room_10",
+      "position_px": {
+        "x": 828,
+        "y": 1126.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 22.0,
+      "width_px": 42,
+      "approx_width_m": 0.41,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.88,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 9
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_11_right_1085_1137",
+      "type": "window",
+      "room_id": "room_11",
+      "position_px": {
+        "x": 106,
+        "y": 1130.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 1111.0,
+      "width_px": 52,
+      "approx_width_m": 0.51,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.79,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 10
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_12_top_0_24",
+      "type": "window",
+      "room_id": "room_12",
+      "position_px": {
+        "x": 1185.0,
+        "y": 19
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.0,
+      "width_px": 24,
+      "approx_width_m": 0.24,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.78,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 11
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_14_top_0_25",
+      "type": "window",
+      "room_id": "room_14",
+      "position_px": {
+        "x": 128.5,
+        "y": 487
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.79,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 13
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_16_top_20_43",
+      "type": "window",
+      "room_id": "room_16",
+      "position_px": {
+        "x": 951.5,
+        "y": 718
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 31.5,
+      "width_px": 23,
+      "approx_width_m": 0.23,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.77,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 15
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_16_right_27_49",
+      "type": "window",
+      "room_id": "room_16",
+      "position_px": {
+        "x": 1023,
+        "y": 756.0
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 38.0,
+      "width_px": 22,
+      "approx_width_m": 0.22,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.76,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 15
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_17_right_0_25",
+      "type": "window",
+      "room_id": "room_17",
+      "position_px": {
+        "x": 1163,
+        "y": 1117.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.79,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 16
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_18_right_0_25",
+      "type": "window",
+      "room_id": "room_18",
+      "position_px": {
+        "x": 977,
+        "y": 1117.5
+      },
+      "side": "right",
+      "wall_location": "right",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.79,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 17
+      },
+      "verification_status": "pending"
+    },
+    {
+      "id": "opening_window_19_top_0_25",
+      "type": "window",
+      "room_id": "room_19",
+      "position_px": {
+        "x": 128.5,
+        "y": 307
+      },
+      "side": "top",
+      "wall_location": "top",
+      "offset_px": 12.5,
+      "width_px": 25,
+      "approx_width_m": 0.25,
+      "scale_x_m_per_px": 0.00986031,
+      "scale_y_m_per_px": 0.00986031,
+      "confidence": 0.79,
+      "detection_method": "wall_mask_boundary_gap_v1",
+      "provenance": {
+        "source": "cv_wall_mask",
+        "region_index": 18
+      },
+      "verification_status": "pending"
+    }
+  ],
+  "room_detection": {
+    "expected_count": 17,
+    "detected_count": 19,
+    "matched_by_type": 9,
+    "false_negative_by_type": [
+      "bathroom",
+      "bathroom",
+      "dining",
+      "store",
+      "unknown",
+      "unknown",
+      "verandah",
+      "garage"
+    ],
+    "false_positive_by_type": [
+      "kitchen",
+      "kitchen",
+      "kitchen",
+      "corridor",
+      "corridor",
+      "corridor",
+      "corridor",
+      "corridor",
+      "corridor",
+      "corridor"
+    ],
+    "recall_by_type": 0.529,
+    "precision_by_type": 0.474
+  },
+  "door_metrics": {
+    "evaluated": false,
+    "reason": "No confident expected annotations; uncertain observations are intentionally excluded.",
+    "detected_count": 56,
+    "expected_count": 0,
+    "precision": null,
+    "recall": null,
+    "false_positives": [],
+    "false_negatives": []
+  },
+  "window_metrics": {
+    "evaluated": false,
+    "reason": "No confident expected annotations; uncertain observations are intentionally excluded.",
+    "detected_count": 15,
+    "expected_count": 0,
+    "precision": null,
+    "recall": null,
+    "false_positives": [],
+    "false_negatives": []
+  },
+  "confidence_distribution": {
+    "0.00-0.49": 0,
+    "0.50-0.69": 27,
+    "0.70-0.84": 41,
+    "0.85-1.00": 3
+  },
+  "annotation_status": {
+    "expected": {
+      "rooms": [
+        {
+          "id": "expected_room_1",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_2",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_3",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_4",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_5",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_6",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_7",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_8",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_9",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_10",
+          "type": "kitchen",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_11",
+          "type": "dining",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_12",
+          "type": "living",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_13",
+          "type": "store",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_14",
+          "type": "unknown",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_15",
+          "type": "unknown",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_16",
+          "type": "verandah",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_17",
+          "type": "garage",
+          "status": "expected"
+        }
+      ],
+      "openings": []
+    },
+    "accepted": {
+      "doors": [],
+      "windows": []
+    },
+    "rejected": {
+      "doors": [],
+      "windows": []
+    },
+    "uncertain": {
+      "openings": [
+        {
+          "type": "door",
+          "status": "uncertain",
+          "observation": "Several clearly drawn door swings exist, including shop frontage and interior rooms."
+        },
+        {
+          "type": "window",
+          "status": "uncertain",
+          "observation": "Perimeter window bands are visible."
+        },
+        {
+          "type": "room_type",
+          "status": "uncertain",
+          "observation": "MULTIPURPOSE ROOM and SHOP have no canonical electrical-rule type yet and are annotated as unknown."
+        }
+      ],
+      "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
+    }
+  }
+}
