@@ -164,18 +164,31 @@ def preprocess(img):
 #  2. WALL MASK
 # ═════════════════════════════════════════════════════════════════════════════
 def make_wall_mask(binary, W, H):
-    # Adaptive kernel: larger plans need bigger kernel to close wall gaps
-    plan_diag = (W*W + H*H)**0.5
-    kern_sz   = max(5, min(14, int(plan_diag / 80)))
+    # Structural walls are long, mostly horizontal/vertical strokes. Isolate
+    # them before closing gaps so furniture outlines, text and sanitary
+    # symbols do not become miniature room boundaries.
+    short_side = min(W, H)
+    line_len = max(18, int(short_side * 0.035))
+    h_lines = cv2.morphologyEx(
+        binary, cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (line_len, 1)))
+    v_lines = cv2.morphologyEx(
+        binary, cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_len)))
+    structural = cv2.bitwise_or(h_lines, v_lines)
 
-    k_close = cv2.getStructuringElement(cv2.MORPH_RECT,(kern_sz, kern_sz))
-    k_dil   = cv2.getStructuringElement(cv2.MORPH_RECT,(kern_sz//2+1, kern_sz//2+1))
+    # Close drawing-scale gaps in supported wall lines, then apply only modest
+    # dilation. This closes doorway breaks for component segmentation without
+    # erasing thin internal partitions.
+    plan_diag = (W * W + H * H) ** 0.5
+    kern_sz = max(3, min(9, int(plan_diag / 120)))
+    k_close = cv2.getStructuringElement(cv2.MORPH_RECT, (kern_sz, kern_sz))
+    k_dil = cv2.getStructuringElement(
+        cv2.MORPH_RECT, (max(2, kern_sz // 2), max(2, kern_sz // 2)))
+    closed = cv2.morphologyEx(structural, cv2.MORPH_CLOSE, k_close, iterations=2)
+    wall = cv2.dilate(closed, k_dil, iterations=1)
 
-    # Close gaps in wall lines, then dilate to thicken walls
-    closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, k_close, iterations=2)
-    wall   = cv2.dilate(closed, k_dil, iterations=1)
-
-    # Remove tiny noise blobs
+    # Remove tiny noise blobs.
     nb, out, stats, _ = cv2.connectedComponentsWithStats(wall, connectivity=8)
     result = np.zeros_like(wall)
     min_sz = H * W * 0.0002
@@ -184,42 +197,64 @@ def make_wall_mask(binary, W, H):
             result[out == i] = 255
     return result
 
-
 # ═════════════════════════════════════════════════════════════════════════════
 #  3. ROOM REGIONS
 # ═════════════════════════════════════════════════════════════════════════════
 def find_room_regions(wall_mask, W, H):
     floor = cv2.bitwise_not(wall_mask)
 
-    # Strip border
-    bw = max(3, W//60)
-    bh = max(3, H//60)
-    floor[:bh, :]=0; floor[-bh:,:]=0
-    floor[:,:bw]=0;  floor[:,-bw:]=0
+    # Strip the drawing/page border. The actual plan is normally inset from it.
+    bw = max(3, W // 60)
+    bh = max(3, H // 60)
+    floor[:bh, :] = 0
+    floor[-bh:, :] = 0
+    floor[:, :bw] = 0
+    floor[:, -bw:] = 0
 
     num, labels, stats, centroids = cv2.connectedComponentsWithStats(
         floor, connectivity=4)
 
-    total  = W * H
-    regions= []
+    total = W * H
+    min_room_px = max(MIN_ROOM_PX, int(total * 0.003))
+    min_room_span = max(12, int(min(W, H) * 0.045))
+    regions = []
     for i in range(1, num):
         area = int(stats[i, cv2.CC_STAT_AREA])
-        if area < MIN_ROOM_PX:          continue
-        if area / total > MAX_FRAC:     continue
-        x  = int(stats[i, cv2.CC_STAT_LEFT])
-        y  = int(stats[i, cv2.CC_STAT_TOP])
+        if area < min_room_px:
+            continue
+        if area / total > MAX_FRAC:
+            continue
+        x = int(stats[i, cv2.CC_STAT_LEFT])
+        y = int(stats[i, cv2.CC_STAT_TOP])
         rw = int(stats[i, cv2.CC_STAT_WIDTH])
         rh = int(stats[i, cv2.CC_STAT_HEIGHT])
+
+        # Long closet/furniture slivers are not occupiable rooms. The limit is
+        # scale-relative and deliberately permits compact bathrooms/WCs.
+        if min(rw, rh) < min_room_span:
+            continue
         cx, cy = float(centroids[i][0]), float(centroids[i][1])
-        # Skip extremely thin slivers
-        asp = max(rw,rh)/max(min(rw,rh),1)
-        if asp > 12 and area < 10000: continue
-        regions.append({"x":x,"y":y,"w":rw,"h":rh,
-                         "area":area,"cx":cx,"cy":cy})
+        asp = max(rw, rh) / max(min(rw, rh), 1)
+        if asp > 12 and area < 10000:
+            continue
+
+        # Dimension bands and the page/exterior envelope can survive the
+        # border strip. Reject only page-relative edge artifacts; no plan-
+        # specific count, coordinate, or physical-dimension assumption is used.
+        wf, hf = rw / W, rh / H
+        near_left_or_right = min(x, W - (x + rw)) < W * 0.04
+        near_top_or_bottom = min(y, H - (y + rh)) < H * 0.04
+        if wf > 0.90 and hf > 0.90:
+            continue
+        if ((wf < 0.08 and hf > 0.70 and near_left_or_right) or
+                (hf < 0.08 and wf > 0.70 and near_top_or_bottom)):
+            continue
+
+        regions.append({"x": x, "y": y, "w": rw, "h": rh,
+                        "area": area, "cx": cx, "cy": cy})
 
     regions.sort(key=lambda r: r["area"], reverse=True)
     return regions
-
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  4. OCR  (best-effort, graceful failure)
