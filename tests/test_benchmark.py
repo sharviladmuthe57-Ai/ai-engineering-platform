@@ -1,6 +1,7 @@
 import unittest
 
 from benchmarks.runner import confidence_distribution, opening_detection_result, room_detection_result
+from benchmarks.geometric import evaluate
 
 
 class BenchmarkMetricsTests(unittest.TestCase):
@@ -33,6 +34,20 @@ class BenchmarkMetricsTests(unittest.TestCase):
     def test_confidence_distribution(self):
         result = confidence_distribution([{"confidence": 0.4}, {"confidence": 0.65}, {"confidence": 0.8}, {"confidence": 0.9}])
         self.assertEqual(result, {"0.00-0.49": 1, "0.50-0.69": 1, "0.70-0.84": 1, "0.85-1.00": 1})
+
+    def test_geometric_matching_is_one_to_one(self):
+        detected = [
+            {"id": "d1", "geometry_px": {"polygon": [[0, 0], [10, 0], [10, 10], [0, 10]], "area": 121}},
+            {"id": "d2", "geometry_px": {"polygon": [[20, 0], [30, 0], [30, 10], [20, 10]], "area": 121}},
+        ]
+        expected = [
+            {"id": "e1", "status": "confirmed", "polygon": [[0, 0], [10, 0], [10, 10], [0, 10]]},
+            {"id": "e2", "status": "confirmed", "polygon": [[20, 0], [30, 0], [30, 10], [20, 10]]},
+        ]
+        result = evaluate(detected, expected)
+        self.assertEqual(result["matched_count"], 2)
+        self.assertEqual(result["false_positives"], [])
+        self.assertEqual(result["missed_rooms"], [])
 
 
 if __name__ == "__main__":
