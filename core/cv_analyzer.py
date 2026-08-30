@@ -327,11 +327,13 @@ def classify_space_candidates(regions, binary, wall_mask, W, H):
         fill_ratio = candidate["area"] / max(w * h, 1)
         classification, confidence, evidence = "occupiable", 0.55, []
 
-        if _crossed_void_marker(binary, candidate):
+        if aspect > 3.2 and _crossed_void_marker(binary, candidate):
             classification, confidence, evidence = "void", 0.90, ["crossed_void_marker"]
         elif (_repeated_line_pattern(binary, candidate) and
               min(w, h) > min(W, H) * .10):
-            classification, confidence, evidence = "stair", 0.82, ["repeated_internal_lines"]
+            # Repeated lines also occur in bedrooms, bathrooms and window bands.
+            # Keep these candidates until a stair classifier has stronger evidence.
+            classification, confidence, evidence = "uncertain", 0.45, ["repeated_internal_lines"]
         elif (aspect > 3.5 and min(w, h) > min(W, H) * .10 and
               weak_sides >= 2 and fill_ratio < .82):
             classification, confidence, evidence = "circulation", 0.80, ["elongated", "weak_boundary_support"]
