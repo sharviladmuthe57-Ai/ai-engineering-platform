@@ -71,8 +71,10 @@ def analyze_floor_plan(image_path: str,
     wall_mask = make_wall_mask(binary, W, H)
 
     # 3. Find enclosed room regions
-    regions = find_room_regions(wall_mask, W, H)
-    print(f"[CV] Regions found: {len(regions)}")
+    raw_regions = find_room_regions(wall_mask, W, H)
+    regions, space_candidates = classify_space_candidates(
+        raw_regions, binary, wall_mask, W, H)
+    print(f"[CV] Regions found: {len(regions)} (raw: {len(raw_regions)})")
 
     # 4. OCR — attempt, use if successful, skip if not
     ocr_labels = []
@@ -120,6 +122,7 @@ def analyze_floor_plan(image_path: str,
                 "has_compound": False,
             },
             "rooms"            : rooms,
+            "space_candidates" : space_candidates,
             "detected_elements": elements,
             "opening_candidates": opening_candidates,
             "electrical_hints" : [],
@@ -128,6 +131,7 @@ def analyze_floor_plan(image_path: str,
                 "image_px"     : f"{W}×{H}",
                 "scale_mppx"   : round(scale, 5),
                 "regions_found": len(regions),
+                "raw_regions_found": len(raw_regions),
                 "ocr_labels"   : len(ocr_labels),
                 "rooms_final"  : len(rooms),
                 "opening_candidates": len(opening_candidates),
@@ -264,6 +268,87 @@ def find_room_regions(wall_mask, W, H):
 
     regions.sort(key=lambda r: r["area"], reverse=True)
     return regions
+
+def _boundary_support(wall_mask, region):
+    """Fraction of the candidate boundary backed by structural wall pixels."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    pad = 2
+    samples = [
+        wall_mask[max(0, y-pad):min(wall_mask.shape[0], y+pad+1), x:x+w],
+        wall_mask[max(0, y+h-pad):min(wall_mask.shape[0], y+h+pad+1), x:x+w],
+        wall_mask[y:y+h, max(0, x-pad):min(wall_mask.shape[1], x+pad+1)],
+        wall_mask[y:y+h, max(0, x+w-pad):min(wall_mask.shape[1], x+w+pad+1)],
+    ]
+    return [float(np.count_nonzero(sample > 0)) / sample.size if sample.size else 0.0
+            for sample in samples]
+
+
+def _repeated_line_pattern(binary, region):
+    """Detect multiple long, similarly oriented internal strokes (stairs)."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    inset = max(4, min(w, h) // 16)
+    roi = binary[y+inset:y+h-inset, x+inset:x+w-inset]
+    if roi.size == 0:
+        return False
+    horizontal = np.count_nonzero(np.sum(roi > 0, axis=1) >= roi.shape[1] * 0.55)
+    vertical = np.count_nonzero(np.sum(roi > 0, axis=0) >= roi.shape[0] * 0.55)
+    return max(horizontal, vertical) >= 5
+
+
+def _crossed_void_marker(binary, region):
+    """Conservative X-marker signal used on plans that label a floor void."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    roi = binary[y:y+h, x:x+w]
+    lines = cv2.HoughLinesP(
+        roi, 1, np.pi / 180, threshold=max(10, min(w, h)//5),
+        minLineLength=max(10, min(w, h)//3), maxLineGap=8)
+    if lines is None:
+        return False
+    slopes = []
+    for x1, y1, x2, y2 in lines[:, 0]:
+        if x2 == x1:
+            continue
+        slope = (y2-y1) / (x2-x1)
+        if 0.25 < abs(slope) < 4:
+            slopes.append(slope)
+    return any(slope > 0 for slope in slopes) and any(slope < 0 for slope in slopes)
+
+
+def classify_space_candidates(regions, binary, wall_mask, W, H):
+    """Classify raw connected components without altering segmentation itself."""
+    kept, candidates = [], []
+    for region in regions:
+        candidate = dict(region)
+        x, y, w, h = (candidate[key] for key in ("x", "y", "w", "h"))
+        supports = _boundary_support(wall_mask, candidate)
+        weak_sides = sum(value < 0.35 for value in supports)
+        aspect = max(w, h) / max(min(w, h), 1)
+        fill_ratio = candidate["area"] / max(w * h, 1)
+        classification, confidence, evidence = "occupiable", 0.55, []
+
+        if _crossed_void_marker(binary, candidate):
+            classification, confidence, evidence = "void", 0.90, ["crossed_void_marker"]
+        elif (_repeated_line_pattern(binary, candidate) and
+              min(w, h) > min(W, H) * .10):
+            classification, confidence, evidence = "stair", 0.82, ["repeated_internal_lines"]
+        elif (aspect > 3.5 and min(w, h) > min(W, H) * .10 and
+              weak_sides >= 2 and fill_ratio < .82):
+            classification, confidence, evidence = "circulation", 0.80, ["elongated", "weak_boundary_support"]
+        elif fill_ratio < .38 and candidate["area"] < W * H * .012 and weak_sides >= 2:
+            classification, confidence, evidence = "artifact", 0.72, ["low_fill", "weak_boundary_support"]
+        elif (x < W * .05 or y < H * .05 or x + w > W * .95 or y + h > H * .95) and weak_sides <= 1:
+            classification, confidence, evidence = "semi_exterior", 0.55, ["exterior_boundary_contact"]
+        elif weak_sides >= 3:
+            classification, confidence, evidence = "uncertain", 0.45, ["limited_boundary_support"]
+
+        candidate["space_class"] = classification
+        candidate["classification_confidence"] = confidence
+        candidate["classification_evidence"] = evidence
+        candidates.append(candidate)
+        if classification not in {"void", "stair", "circulation", "artifact"}:
+            kept.append(candidate)
+    return kept, candidates
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  4. OCR  (best-effort, graceful failure)
