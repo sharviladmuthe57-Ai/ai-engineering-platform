@@ -28,8 +28,8 @@ class RoomSegmentationTests(unittest.TestCase):
                              for x, _, _, h in boxes))
 
     def test_void_classification_is_additive_and_filtered(self):
-        candidate = {"x": 20, "y": 20, "w": 80, "h": 80, "area": 6400,
-                     "cx": 60.0, "cy": 60.0, "polygon": [[20, 20], [100, 20], [100, 100], [20, 100]]}
+        candidate = {"x": 20, "y": 20, "w": 300, "h": 80, "area": 24000,
+                     "cx": 170.0, "cy": 60.0, "polygon": [[20, 20], [320, 20], [320, 100], [20, 100]]}
         binary = np.zeros((160, 160), dtype=np.uint8)
         walls = np.full((160, 160), 255, dtype=np.uint8)
         with patch("core.cv_analyzer._crossed_void_marker", return_value=True):
