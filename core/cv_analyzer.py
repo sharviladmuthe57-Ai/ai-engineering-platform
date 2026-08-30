@@ -317,8 +317,9 @@ def _crossed_void_marker(binary, region):
 def classify_space_candidates(regions, binary, wall_mask, W, H):
     """Classify raw connected components without altering segmentation itself."""
     kept, candidates = [], []
-    for region in regions:
+    for index, region in enumerate(regions, start=1):
         candidate = dict(region)
+        candidate["id"] = f"space_candidate_{index}"
         x, y, w, h = (candidate[key] for key in ("x", "y", "w", "h"))
         supports = _boundary_support(wall_mask, candidate)
         weak_sides = sum(value < 0.35 for value in supports)
