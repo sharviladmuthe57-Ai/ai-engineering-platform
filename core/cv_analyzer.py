@@ -250,8 +250,17 @@ def find_room_regions(wall_mask, W, H):
                 (hf < 0.08 and wf > 0.70 and near_top_or_bottom)):
             continue
 
+        component = np.where(labels == i, 255, 0).astype(np.uint8)
+        contours, _ = cv2.findContours(component, cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+        contour = max(contours, key=cv2.contourArea)
+        epsilon = max(1.0, 0.005 * cv2.arcLength(contour, True))
+        approximation = cv2.approxPolyDP(contour, epsilon, True)
+        polygon = [[int(point[0][0]), int(point[0][1])]
+                   for point in approximation]
         regions.append({"x": x, "y": y, "w": rw, "h": rh,
-                        "area": area, "cx": cx, "cy": cy})
+                        "area": area, "cx": cx, "cy": cy,
+                        "polygon": polygon})
 
     regions.sort(key=lambda r: r["area"], reverse=True)
     return regions
@@ -422,6 +431,16 @@ def build_rooms(regions, ocr_labels, scale, scale_y, H, W, wall_mask, warnings):
             "height" : max(0.5, h_m),
             "area_m2": round(w_m*h_m, 1),
             "shape"  : "rectangle",
+            # Additive raw-image geometry for benchmark/review consumers. The
+            # legacy metre-space room contract remains unchanged.
+            "geometry_px": {
+                "bbox": {"x": reg["x"], "y": reg["y"],
+                         "width": reg["w"], "height": reg["h"]},
+                "polygon": reg.get("polygon", []),
+                "centroid": {"x": round(reg["cx"], 2),
+                             "y": round(reg["cy"], 2)},
+                "area": reg["area"],
+            },
             "doors"  : doors,
             "windows": windows,
         })
