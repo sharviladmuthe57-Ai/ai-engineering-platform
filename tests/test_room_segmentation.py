@@ -1,9 +1,10 @@
 import unittest
+from unittest.mock import patch
 
 import cv2
 import numpy as np
 
-from core.cv_analyzer import find_room_regions
+from core.cv_analyzer import classify_space_candidates, find_room_regions
 
 
 class RoomSegmentationTests(unittest.TestCase):
@@ -25,3 +26,14 @@ class RoomSegmentationTests(unittest.TestCase):
                             for x, y, _, _ in boxes))
         self.assertFalse(any(x < 75 and h > 700
                              for x, _, _, h in boxes))
+
+    def test_void_classification_is_additive_and_filtered(self):
+        candidate = {"x": 20, "y": 20, "w": 80, "h": 80, "area": 6400,
+                     "cx": 60.0, "cy": 60.0, "polygon": [[20, 20], [100, 20], [100, 100], [20, 100]]}
+        binary = np.zeros((160, 160), dtype=np.uint8)
+        walls = np.full((160, 160), 255, dtype=np.uint8)
+        with patch("core.cv_analyzer._crossed_void_marker", return_value=True):
+            kept, candidates = classify_space_candidates([candidate], binary, walls, 160, 160)
+        self.assertEqual(kept, [])
+        self.assertEqual(candidates[0]["space_class"], "void")
+        self.assertIn("crossed_void_marker", candidates[0]["classification_evidence"])
