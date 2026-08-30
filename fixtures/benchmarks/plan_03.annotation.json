@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "plan_id": "plan_03",
   "fixture": {
     "file": "plan_03.png",
@@ -105,7 +105,361 @@
           "status": "expected"
         }
       ],
-      "openings": []
+      "openings": [],
+      "spaces": [
+        {
+          "id": "space_bed_1",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              109,
+              29
+            ],
+            [
+              408,
+              29
+            ],
+            [
+              408,
+              291
+            ],
+            [
+              109,
+              291
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_1",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              370,
+              32
+            ],
+            [
+              456,
+              32
+            ],
+            [
+              456,
+              191
+            ],
+            [
+              370,
+              191
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_2",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              461,
+              32
+            ],
+            [
+              556,
+              32
+            ],
+            [
+              556,
+              191
+            ],
+            [
+              461,
+              191
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_2",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              559,
+              29
+            ],
+            [
+              809,
+              29
+            ],
+            [
+              809,
+              291
+            ],
+            [
+              559,
+              291
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_3",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              818,
+              32
+            ],
+            [
+              906,
+              32
+            ],
+            [
+              906,
+              191
+            ],
+            [
+              818,
+              191
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_4",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              818,
+              200
+            ],
+            [
+              906,
+              200
+            ],
+            [
+              906,
+              291
+            ],
+            [
+              818,
+              291
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_3",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              973,
+              29
+            ],
+            [
+              1164,
+              29
+            ],
+            [
+              1164,
+              291
+            ],
+            [
+              973,
+              291
+            ]
+          ]
+        },
+        {
+          "id": "space_open_living_kitchen_dining",
+          "type": "open_plan",
+          "status": "confirmed",
+          "polygon": [
+            [
+              109,
+              300
+            ],
+            [
+              909,
+              300
+            ],
+            [
+              909,
+              770
+            ],
+            [
+              109,
+              770
+            ]
+          ],
+          "semantic_zones": [
+            "kitchen",
+            "dining",
+            "living"
+          ],
+          "notes": "The drawing contains no physical walls between these labelled zones."
+        },
+        {
+          "id": "space_bed_4",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              912,
+              360
+            ],
+            [
+              1164,
+              360
+            ],
+            [
+              1164,
+              560
+            ],
+            [
+              912,
+              560
+            ]
+          ]
+        },
+        {
+          "id": "space_utility",
+          "type": "utility",
+          "status": "uncertain",
+          "polygon": [
+            [
+              910,
+              563
+            ],
+            [
+              994,
+              563
+            ],
+            [
+              994,
+              657
+            ],
+            [
+              910,
+              657
+            ]
+          ],
+          "notes": "Narrow utility space; excluded pending review."
+        },
+        {
+          "id": "space_bath_5",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              1003,
+              563
+            ],
+            [
+              1164,
+              563
+            ],
+            [
+              1164,
+              657
+            ],
+            [
+              1003,
+              657
+            ]
+          ]
+        },
+        {
+          "id": "space_multipurpose",
+          "type": "unknown",
+          "status": "confirmed",
+          "polygon": [
+            [
+              912,
+              669
+            ],
+            [
+              1164,
+              669
+            ],
+            [
+              1164,
+              769
+            ],
+            [
+              912,
+              769
+            ]
+          ]
+        },
+        {
+          "id": "space_shop",
+          "type": "unknown",
+          "status": "confirmed",
+          "polygon": [
+            [
+              109,
+              784
+            ],
+            [
+              542,
+              784
+            ],
+            [
+              542,
+              1084
+            ],
+            [
+              109,
+              1084
+            ]
+          ]
+        },
+        {
+          "id": "space_covered_porch",
+          "type": "verandah",
+          "status": "confirmed",
+          "polygon": [
+            [
+              554,
+              784
+            ],
+            [
+              823,
+              784
+            ],
+            [
+              823,
+              1084
+            ],
+            [
+              554,
+              1084
+            ]
+          ]
+        },
+        {
+          "id": "space_garage",
+          "type": "garage",
+          "status": "confirmed",
+          "polygon": [
+            [
+              834,
+              784
+            ],
+            [
+              1164,
+              784
+            ],
+            [
+              1164,
+              1084
+            ],
+            [
+              834,
+              1084
+            ]
+          ]
+        }
+      ]
     },
     "accepted": {
       "doors": [],
