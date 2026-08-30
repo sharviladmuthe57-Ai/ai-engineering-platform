@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "plan_id": "plan_02",
   "fixture": {
     "file": "plan_02.png",
@@ -70,7 +70,287 @@
           "status": "expected"
         }
       ],
-      "openings": []
+      "openings": [],
+      "spaces": [
+        {
+          "id": "space_bed_1",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              70
+            ],
+            [
+              460,
+              70
+            ],
+            [
+              460,
+              284
+            ],
+            [
+              168,
+              284
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_2",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              467,
+              70
+            ],
+            [
+              659,
+              70
+            ],
+            [
+              659,
+              326
+            ],
+            [
+              467,
+              326
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_1",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              712,
+              70
+            ],
+            [
+              799,
+              70
+            ],
+            [
+              799,
+              263
+            ],
+            [
+              712,
+              263
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_3",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              842,
+              70
+            ],
+            [
+              1045,
+              70
+            ],
+            [
+              1045,
+              326
+            ],
+            [
+              842,
+              326
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_2",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              337
+            ],
+            [
+              394,
+              337
+            ],
+            [
+              394,
+              419
+            ],
+            [
+              168,
+              419
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_3",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              428
+            ],
+            [
+              394,
+              428
+            ],
+            [
+              394,
+              514
+            ],
+            [
+              168,
+              514
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_4",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              560
+            ],
+            [
+              460,
+              560
+            ],
+            [
+              460,
+              773
+            ],
+            [
+              168,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_5",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              467,
+              577
+            ],
+            [
+              659,
+              577
+            ],
+            [
+              659,
+              773
+            ],
+            [
+              467,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_4",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              712,
+              580
+            ],
+            [
+              799,
+              580
+            ],
+            [
+              799,
+              773
+            ],
+            [
+              712,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_6",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              842,
+              519
+            ],
+            [
+              1045,
+              519
+            ],
+            [
+              1045,
+              773
+            ],
+            [
+              842,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_void",
+          "type": "void",
+          "status": "uncertain",
+          "polygon": [
+            [
+              467,
+              429
+            ],
+            [
+              768,
+              429
+            ],
+            [
+              768,
+              509
+            ],
+            [
+              467,
+              509
+            ]
+          ],
+          "notes": "Not an occupiable electrical room; excluded."
+        },
+        {
+          "id": "space_stair",
+          "type": "stair",
+          "status": "uncertain",
+          "polygon": [
+            [
+              842,
+              338
+            ],
+            [
+              1045,
+              338
+            ],
+            [
+              1045,
+              509
+            ],
+            [
+              842,
+              509
+            ]
+          ],
+          "notes": "Excluded from room scoring."
+        }
+      ]
     },
     "accepted": {
       "doors": [],
