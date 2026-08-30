@@ -129,6 +129,7 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
             "scale_note": "The runner does not convert annotated feet labels into metres.",
         },
         "detected_rooms": data.get("rooms", []),
+        "space_candidates": data.get("space_candidates", []),
         "detected_door_candidates": [item for item in candidates if item["type"] == "door"],
         "detected_window_candidates": [item for item in candidates if item["type"] == "window"],
         "room_detection": room_detection_result(data.get("rooms", []), expected["rooms"]),
