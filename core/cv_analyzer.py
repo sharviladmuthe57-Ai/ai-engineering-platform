@@ -517,6 +517,9 @@ def build_rooms(regions, ocr_labels, scale, scale_y, H, W, wall_mask, warnings):
             "height" : max(0.5, h_m),
             "area_m2": round(w_m*h_m, 1),
             "shape"  : "rectangle",
+            "space_class": reg.get("space_class", "occupiable"),
+            "classification_confidence": reg.get("classification_confidence", 0.0),
+            "classification_evidence": reg.get("classification_evidence", []),
             # Additive raw-image geometry for benchmark/review consumers. The
             # legacy metre-space room contract remains unchanged.
             "geometry_px": {
