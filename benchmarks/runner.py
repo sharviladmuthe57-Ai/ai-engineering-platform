@@ -8,6 +8,11 @@ from typing import Any
 import json
 import math
 
+try:
+    from .geometric import evaluate as geometric_room_result
+except ImportError:  # Supports `python benchmarks/run_benchmark.py`.
+    from geometric import evaluate as geometric_room_result
+
 
 def load_annotation(path: str | Path) -> dict[str, Any]:
     with open(path, encoding="utf-8") as handle:
@@ -127,6 +132,8 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
         "detected_door_candidates": [item for item in candidates if item["type"] == "door"],
         "detected_window_candidates": [item for item in candidates if item["type"] == "window"],
         "room_detection": room_detection_result(data.get("rooms", []), expected["rooms"]),
+        "geometric_room_detection": geometric_room_result(
+            data.get("rooms", []), expected.get("spaces", [])),
         "door_metrics": opening_detection_result(candidates, expected["openings"], "door"),
         "window_metrics": opening_detection_result(candidates, expected["openings"], "window"),
         "confidence_distribution": confidence_distribution(candidates),
