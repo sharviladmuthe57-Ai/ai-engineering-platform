@@ -10,8 +10,10 @@ import math
 
 try:
     from .geometric import evaluate as geometric_room_result
+    from .opening_metrics import evaluate_openings
 except ImportError:  # Supports `python benchmarks/run_benchmark.py`.
     from geometric import evaluate as geometric_room_result
+    from opening_metrics import evaluate_openings
 
 
 def load_annotation(path: str | Path) -> dict[str, Any]:
@@ -135,8 +137,8 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
         "room_detection": room_detection_result(data.get("rooms", []), expected["rooms"]),
         "geometric_room_detection": geometric_room_result(
             data.get("rooms", []), expected.get("spaces", [])),
-        "door_metrics": opening_detection_result(candidates, expected["openings"], "door"),
-        "window_metrics": opening_detection_result(candidates, expected["openings"], "window"),
+        "door_metrics": evaluate_openings(candidates, expected["openings"], "door"),
+        "window_metrics": evaluate_openings(candidates, expected["openings"], "window"),
         "confidence_distribution": confidence_distribution(candidates),
         "annotation_status": annotation["annotations"],
     }
