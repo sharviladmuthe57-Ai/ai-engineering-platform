@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "plan_id": "plan_01",
   "fixture": {
     "file": "plan_01.png",
@@ -75,7 +75,431 @@
           "status": "expected"
         }
       ],
-      "openings": [],
+      "openings": [
+        {
+          "id": "door_p01_01",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 335,
+            "y": 220
+          },
+          "endpoints_px": [
+            {
+              "x": 300,
+              "y": 220
+            },
+            {
+              "x": 370,
+              "y": 220
+            }
+          ],
+          "width_px": 70,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1",
+            "space_open_living_kitchen"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_open_plan",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_02",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 406,
+            "y": 220
+          },
+          "endpoints_px": [
+            {
+              "x": 372,
+              "y": 220
+            },
+            {
+              "x": 440,
+              "y": 220
+            }
+          ],
+          "width_px": 68,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2",
+            "space_open_living_kitchen"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_open_plan",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_03",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 337,
+            "y": 151
+          },
+          "endpoints_px": [
+            {
+              "x": 304,
+              "y": 151
+            },
+            {
+              "x": 369,
+              "y": 151
+            }
+          ],
+          "width_px": 65,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_1"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_circulation",
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p01_04",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 580,
+            "y": 151
+          },
+          "endpoints_px": [
+            {
+              "x": 545,
+              "y": 151
+            },
+            {
+              "x": 615,
+              "y": 151
+            }
+          ],
+          "width_px": 70,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_2"
+          ],
+          "hinge_side": "right",
+          "swing_direction": "into_circulation",
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p01_05",
+          "type": "door",
+          "status": "uncertain",
+          "center_px": {
+            "x": 541,
+            "y": 245
+          },
+          "endpoints_px": [
+            {
+              "x": 541,
+              "y": 223
+            },
+            {
+              "x": 541,
+              "y": 267
+            }
+          ],
+          "width_px": 44,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "notes": "Door swing is visible but its adjoining circulation boundary is ambiguous."
+        },
+        {
+          "id": "door_p01_06",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 542,
+            "y": 470
+          },
+          "endpoints_px": [
+            {
+              "x": 542,
+              "y": 430
+            },
+            {
+              "x": 542,
+              "y": 510
+            }
+          ],
+          "width_px": 80,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen",
+            "space_covered_porch"
+          ],
+          "hinge_side": "bottom",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_07",
+          "type": "door",
+          "status": "uncertain",
+          "center_px": {
+            "x": 680,
+            "y": 324
+          },
+          "endpoints_px": [
+            {
+              "x": 615,
+              "y": 324
+            },
+            {
+              "x": 745,
+              "y": 324
+            }
+          ],
+          "width_px": 130,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "notes": "Office/utility threshold is partly obscured by linework."
+        },
+        {
+          "id": "win_p01_01",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 214,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 157,
+              "y": 17
+            },
+            {
+              "x": 270,
+              "y": 17
+            }
+          ],
+          "width_px": 113,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_02",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 457,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 400,
+              "y": 17
+            },
+            {
+              "x": 514,
+              "y": 17
+            }
+          ],
+          "width_px": 114,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_03",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 621,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 560,
+              "y": 17
+            },
+            {
+              "x": 682,
+              "y": 17
+            }
+          ],
+          "width_px": 122,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_04",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 63
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 43
+            },
+            {
+              "x": 121,
+              "y": 82
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_05",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 262
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 242
+            },
+            {
+              "x": 121,
+              "y": 281
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_06",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 414
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 394
+            },
+            {
+              "x": 121,
+              "y": 433
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_07",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 751,
+            "y": 63
+          },
+          "endpoints_px": [
+            {
+              "x": 751,
+              "y": 43
+            },
+            {
+              "x": 751,
+              "y": 82
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_08",
+          "type": "window",
+          "status": "uncertain",
+          "center_px": {
+            "x": 751,
+            "y": 208
+          },
+          "endpoints_px": [
+            {
+              "x": 751,
+              "y": 194
+            },
+            {
+              "x": 751,
+              "y": 222
+            }
+          ],
+          "width_px": 28,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "notes": "Short right-wall mark is visually similar to a dimension break."
+        }
+      ],
       "spaces": [
         {
           "id": "space_bed_1",
@@ -324,18 +748,7 @@
       "windows": []
     },
     "uncertain": {
-      "openings": [
-        {
-          "type": "door",
-          "status": "uncertain",
-          "observation": "Multiple dashed door swings are visible."
-        },
-        {
-          "type": "window",
-          "status": "uncertain",
-          "observation": "Exterior window marks are visible along the perimeter."
-        }
-      ],
+      "openings": [],
       "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
     }
   }
