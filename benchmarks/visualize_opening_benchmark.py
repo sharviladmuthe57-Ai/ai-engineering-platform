@@ -28,8 +28,8 @@ def _line(canvas, item, color, label):
                 cv2.FONT_HERSHEY_SIMPLEX, .35, color, 1, cv2.LINE_AA)
 
 
-def render(image_path: Path, annotation_path: Path, output_path: Path) -> None:
-    result, annotation = run_plan(image_path, annotation_path), load_annotation(annotation_path)
+def render(image_path: Path, annotation_path: Path, output_path: Path, opening_detector: str = "v1") -> None:
+    result, annotation = run_plan(image_path, annotation_path, opening_detector=opening_detector), load_annotation(annotation_path)
     canvas = cv2.imread(str(image_path))
     expected = annotation["annotations"]["expected"]["openings"]
     for item in expected:
@@ -40,10 +40,10 @@ def render(image_path: Path, annotation_path: Path, output_path: Path) -> None:
     for kind, metrics in (("door", result["door_metrics"]), ("window", result["window_metrics"])):
         matches = {item["detected_id"] for item in metrics["matches"]}
         for item in metrics["false_positives"]:
-            _line(canvas, item, (0, 0, 230), f"FP:{kind[0]}")
+            _line(canvas, item, (0, 0, 230), f"FP:{kind[0]} {float(item.get('confidence', 0)):.2f}")
         for item in result[f"detected_{kind}_candidates"]:
             if item["id"] in matches:
-                _line(canvas, item, (30, 180, 30), f"M:{kind[0]}")
+                _line(canvas, item, (30, 180, 30), f"M:{kind[0]} {float(item.get('confidence', 0)):.2f}")
         for item in metrics["false_negatives"]:
             _line(canvas, item, (220, 0, 220), f"MISS:{kind[0]}")
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,9 +55,11 @@ def main() -> None:
     parser.add_argument("image", type=Path)
     parser.add_argument("annotation", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--detector", choices=("v1", "v2"), default="v1")
     args = parser.parse_args()
-    render(args.image, args.annotation, args.output)
+    render(args.image, args.annotation, args.output, args.detector)
 
 
 if __name__ == "__main__":
     main()
+
