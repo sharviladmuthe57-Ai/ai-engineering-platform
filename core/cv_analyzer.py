@@ -104,10 +104,11 @@ def analyze_floor_plan(image_path: str,
     elements = detect_elements(img, gray, scale, H)
 
     # 8. Opening candidates are additive; V1 remains the immutable default.
-    if opening_detector == "v2":
+    if opening_detector in ("v2", "v3"):
         opening_candidates, opening_debug = extract_opening_candidates_v2(
             wall_mask, binary, regions, scale_x_m_per_px=scale,
-            scale_y_m_per_px=scale_y, W=W, H=H)
+            scale_y_m_per_px=scale_y, W=W, H=H,
+            symbol_aware=opening_detector == "v3")
     else:
         opening_candidates = extract_opening_candidates(
             wall_mask, regions, scale_x_m_per_px=scale, scale_y_m_per_px=scale_y)
