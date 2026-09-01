@@ -300,7 +300,11 @@ def render_electrical_overlay(report: dict[str, Any], output_path: str | Path) -
             cv2.circle(canvas, point, 9, (0, 0, 255), 1, cv2.LINE_AA)
     cv2.rectangle(canvas, (width, 0), (width + 250, height), (28, 28, 28), -1)
     cv2.putText(canvas, "ELECTRICAL BENCHMARK", (width + 12, 28), cv2.FONT_HERSHEY_SIMPLEX, .55, (255, 255, 255), 1, cv2.LINE_AA)
-    legend = [("light", "Light / ceiling"), ("fan", "Fan"), ("switch", "Switch"), ("outlet", "Socket / power"), ("ac", "AC"), ("db", "Distribution board")]
+    legend = [
+        ("light", "Light / ceiling"), ("fan", "Fan"), ("switch", "Switch"),
+        ("outlet", "Socket / power"), ("ac", "AC"), ("exhaust", "Exhaust"),
+        ("default", "Other supported point"), ("db", "Distribution board"),
+    ]
     for index, (symbol, label) in enumerate(legend):
         y = 58 + index * 28
         color = COLORS[symbol]
@@ -309,7 +313,7 @@ def render_electrical_overlay(report: dict[str, Any], output_path: str | Path) -
     quality = report["placement_quality"]
     lines = [f"Components: {report['total_component_count']}", f"Routes: {report['total_route_count']}", f"Wire: {report['total_reported_wire_length_m']} m", f"Wall collisions: {quality['wall_mask_collisions']}", f"Co-locations: {quality['component_collisions']}"]
     for index, line in enumerate(lines):
-        cv2.putText(canvas, line, (width + 12, 250 + index * 22), cv2.FONT_HERSHEY_SIMPLEX, .43, (220, 220, 220), 1, cv2.LINE_AA)
+        cv2.putText(canvas, line, (width + 12, 310 + index * 22), cv2.FONT_HERSHEY_SIMPLEX, .43, (220, 220, 220), 1, cv2.LINE_AA)
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(output_path), canvas)
     return str(output_path)
