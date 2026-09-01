@@ -135,6 +135,7 @@ def run_plan(image_path: str | Path, annotation_path: str | Path, opening_detect
         "space_candidates": data.get("space_candidates", []),
         "detected_door_candidates": [item for item in candidates if item["type"] == "door"],
         "detected_window_candidates": [item for item in candidates if item["type"] == "window"],
+        "uncertain_opening_candidates": [item for item in candidates if item.get("type") == "uncertain"],
         "room_detection": room_detection_result(data.get("rooms", []), expected["rooms"]),
         "geometric_room_detection": geometric_room_result(
             data.get("rooms", []), expected.get("spaces", [])),
