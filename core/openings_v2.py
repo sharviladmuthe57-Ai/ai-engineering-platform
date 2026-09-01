@@ -1,62 +1,135 @@
-"""Additive exterior-aware opening detector V2."""
+"""Exterior-wall-aware opening proposals and conservative V2 classification."""
+
+from __future__ import annotations
+
 from typing import Any
+
+import cv2
 import numpy as np
+
 from .openings import _gaps, _profile
 
-def _ori(s): return "horizontal" if s in ("top","bottom") else "vertical"
-def _bounds(r,s):
-    if s=="top": return r["x"],r["y"]-5,r["x"]+r["w"],r["y"]+5,0
-    if s=="bottom": return r["x"],r["y"]+r["h"]-5,r["x"]+r["w"],r["y"]+r["h"]+5,0
-    if s=="left": return r["x"]-5,r["y"],r["x"]+5,r["y"]+r["h"],1
-    return r["x"]+r["w"]-5,r["y"],r["x"]+r["w"]+5,r["y"]+r["h"],1
-def _exterior(regions,W,H):
-    if not regions:return set()
-    a=min(r["x"] for r in regions); b=min(r["y"] for r in regions)
-    c=max(r["x"]+r["w"] for r in regions); d=max(r["y"]+r["h"] for r in regions); t=max(8,int(min(W,H)*.018)); out=set()
-    for i,r in enumerate(regions):
-        if abs(r["y"]-b)<=t:out.add((i,"top"))
-        if abs(r["y"]+r["h"]-d)<=t:out.add((i,"bottom"))
-        if abs(r["x"]-a)<=t:out.add((i,"left"))
-        if abs(r["x"]+r["w"]-c)<=t:out.add((i,"right"))
-    return out
-def _geometry(r,s,a,b):
-    q=(a+b)/2
-    if s in ("top","bottom"):
-        y=r["y"] if s=="top" else r["y"]+r["h"]; return {"x":r["x"]+q,"y":y},[{"x":r["x"]+a,"y":y},{"x":r["x"]+b,"y":y}]
-    x=r["x"] if s=="left" else r["x"]+r["w"]; return {"x":x,"y":r["y"]+q},[{"x":x,"y":r["y"]+a},{"x":x,"y":r["y"]+b}]
-def _ink(binary,p,r):
-    x,y=p["position_px"]["x"],p["position_px"]["y"]; h=max(8,p["width_px"]//2); d=max(12,int(min(r["w"],r["h"])*.12));s=p["side"]
-    if s=="top":z=binary[int(y):int(y)+d,max(0,int(x)-h):int(x)+h]
-    elif s=="bottom":z=binary[int(y)-d:int(y),max(0,int(x)-h):int(x)+h]
-    elif s=="left":z=binary[max(0,int(y)-h):int(y)+h,int(x):int(x)+d]
-    else:z=binary[max(0,int(y)-h):int(y)+h,int(x)-d:int(x)]
-    return float(np.count_nonzero(z))/z.size if z.size else 1.
-def _parallel(binary,p):
-    (a,b)=p["endpoints_px"];x1,y1=a["x"],a["y"];x2,y2=b["x"],b["y"];k=max(5,p["width_px"]//8)
-    if p["orientation"]=="horizontal":z=binary[max(0,y1-k):y1+k+1,max(0,x1):x2];v=np.sum(z>0,axis=1);n=z.shape[1]
-    else:z=binary[max(0,y1):y2,max(0,x1-k):x1+k+1];v=np.sum(z>0,axis=0);n=z.shape[0]
-    return round(min(1.,np.count_nonzero(v>=n*.45)/3),2) if v.size else 0.
-def _cluster(raw,short):
-    out=[];d=max(12,int(short*.018))
-    for p in sorted(raw,key=lambda x:x["width_px"],reverse=True):
-        q=next((q for q in out if q["orientation"]==p["orientation"] and abs(q["position_px"]["x"]-p["position_px"]["x"])<=d and abs(q["position_px"]["y"]-p["position_px"]["y"])<=d),None)
-        if q:q["raw_proposal_ids"].append(p["proposal_id"]);q["support_count"]+=1;q["exterior_wall"]|=p["exterior_wall"]
-        else:p["raw_proposal_ids"]=[p["proposal_id"]];p["support_count"]=1;out.append(p)
-    return out
-def extract_opening_candidates_v2(wall_mask,binary,regions,*,scale_x_m_per_px,scale_y_m_per_px,W,H):
-    ext=_exterior(regions,W,H);raw=[];lo=max(10,int(min(W,H)*.018));hi=max(70,int(min(W,H)*.23))
-    for i,r in enumerate(regions):
-      for s in ("top","bottom","left","right"):
-       x1,y1,x2,y2,axis=_bounds(r,s)
-       for a,b in _gaps(_profile(wall_mask,x1,y1,x2,y2,axis),lo,hi):
-        pos,ends=_geometry(r,s,a,b);raw.append({"proposal_id":f"v2_raw_{i}_{s}_{a}_{b}","room_id":f"room_{i+1}","region_index":i,"side":s,"wall_location":s,"orientation":_ori(s),"position_px":pos,"endpoints_px":ends,"width_px":b-a,"exterior_wall":(i,s) in ext})
-    clustered=_cluster(raw,min(W,H));final=[]
-    for p in clustered:
-      r=regions[p["region_index"]];noise=round(min(1.,_ink(binary,p,r)*3),2);parallel=_parallel(binary,p) if p["exterior_wall"] else 0.;width=round(min(1.,p["width_px"]/max(min(r["w"],r["h"])*.35,1)),2);kind=None
-      if p["exterior_wall"] and parallel>=.33 and noise<.72:kind="window"
-      elif not p["exterior_wall"] and p["width_px"]>=max(22,int(min(W,H)*.035)) and noise<.36:kind="door"
-      elif p["exterior_wall"] and p["width_px"]>=max(40,int(min(W,H)*.07)) and noise<.42:kind="door"
-      if not kind:continue
-      scale=scale_x_m_per_px if p["orientation"]=="horizontal" else scale_y_m_per_px;conf=.30+.20*width+.20*min(1.,p["support_count"]/2)+(.22*parallel if kind=="window" else .12*(1-noise))
-      final.append({"id":f"opening_v2_{kind}_{p['proposal_id']}","type":kind,"room_id":p["room_id"],"position_px":p["position_px"],"side":p["side"],"wall_location":p["wall_location"],"offset_px":None,"width_px":p["width_px"],"approx_width_m":round(p["width_px"]*scale,2),"scale_x_m_per_px":round(scale_x_m_per_px,8),"scale_y_m_per_px":round(scale_y_m_per_px,8),"confidence":round(min(.92,conf),2),"detection_method":"exterior_wall_aware_v2","provenance":{"source":"cv_wall_mask","version":"v2","raw_proposal_ids":p["raw_proposal_ids"],"evidence":{"gap_score":1.,"exterior_wall":p["exterior_wall"],"parallel_line_score":parallel,"width_score":width,"fixture_noise_penalty":noise,"wall_continuity_score":round(min(1.,p["support_count"]/2),2)}},"verification_status":"pending","endpoints_px":p["endpoints_px"]})
-    return final,{"raw_proposals":len(raw),"deduplicated_proposals":len(clustered),"final_candidates":len(final)}
+
+def _orientation(side: str) -> str:
+    return "horizontal" if side in ("top", "bottom") else "vertical"
+
+
+def _wall_bounds(region: dict[str, Any], side: str) -> tuple[int, int, int, int, int]:
+    if side == "top":
+        return region["x"], region["y"] - 5, region["x"] + region["w"], region["y"] + 5, 0
+    if side == "bottom":
+        return region["x"], region["y"] + region["h"] - 5, region["x"] + region["w"], region["y"] + region["h"] + 5, 0
+    if side == "left":
+        return region["x"] - 5, region["y"], region["x"] + 5, region["y"] + region["h"], 1
+    return region["x"] + region["w"] - 5, region["y"], region["x"] + region["w"] + 5, region["y"] + region["h"], 1
+
+
+def _exterior_sides(regions: list[dict[str, Any]], W: int, H: int) -> set[tuple[int, str]]:
+    if not regions:
+        return set()
+    x0 = min(region["x"] for region in regions)
+    y0 = min(region["y"] for region in regions)
+    x1 = max(region["x"] + region["w"] for region in regions)
+    y1 = max(region["y"] + region["h"] for region in regions)
+    tolerance = max(8, int(min(W, H) * .018))
+    result = set()
+    for index, region in enumerate(regions):
+        if abs(region["y"] - y0) <= tolerance: result.add((index, "top"))
+        if abs(region["y"] + region["h"] - y1) <= tolerance: result.add((index, "bottom"))
+        if abs(region["x"] - x0) <= tolerance: result.add((index, "left"))
+        if abs(region["x"] + region["w"] - x1) <= tolerance: result.add((index, "right"))
+    return result
+
+
+def _point(region: dict[str, Any], side: str, start: int, end: int) -> tuple[float, float]:
+    offset = (start + end) / 2
+    if side in ("top", "bottom"):
+        return region["x"] + offset, region["y"] if side == "top" else region["y"] + region["h"]
+    return region["x"] if side == "left" else region["x"] + region["w"], region["y"] + offset
+
+
+def _endpoints(region: dict[str, Any], side: str, start: int, end: int) -> list[dict[str, int]]:
+    if side in ("top", "bottom"):
+        y = region["y"] if side == "top" else region["y"] + region["h"]
+        return [{"x": region["x"] + start, "y": y}, {"x": region["x"] + end, "y": y}]
+    x = region["x"] if side == "left" else region["x"] + region["w"]
+    return [{"x": x, "y": region["y"] + start}, {"x": x, "y": region["y"] + end}]
+
+
+def _inner_ink_density(binary: np.ndarray, proposal: dict[str, Any], region: dict[str, Any]) -> float:
+    x, y = proposal["position_px"]["x"], proposal["position_px"]["y"]
+    depth = max(12, int(min(region["w"], region["h"]) * .12))
+    half = max(8, proposal["width_px"] // 2)
+    side = proposal["side"]
+    if side == "top": crop = binary[int(y):int(y)+depth, max(0, int(x)-half):int(x)+half]
+    elif side == "bottom": crop = binary[int(y)-depth:int(y), max(0, int(x)-half):int(x)+half]
+    elif side == "left": crop = binary[max(0, int(y)-half):int(y)+half, int(x):int(x)+depth]
+    else: crop = binary[max(0, int(y)-half):int(y)+half, int(x)-depth:int(x)]
+    return float(np.count_nonzero(crop > 0)) / crop.size if crop.size else 1.0
+
+
+def _parallel_line_score(binary: np.ndarray, proposal: dict[str, Any]) -> float:
+    endpoints = proposal["endpoints_px"]
+    x1, y1 = endpoints[0]["x"], endpoints[0]["y"]
+    x2, y2 = endpoints[1]["x"], endpoints[1]["y"]
+    pad = max(5, proposal["width_px"] // 8)
+    if proposal["orientation"] == "horizontal":
+        crop = binary[max(0, y1-pad):min(binary.shape[0], y1+pad+1), max(0, x1):min(binary.shape[1], x2)]
+        lengths = np.sum(crop > 0, axis=1)
+    else:
+        crop = binary[max(0, y1):min(binary.shape[0], y2), max(0, x1-pad):min(binary.shape[1], x1+pad+1)]
+        lengths = np.sum(crop > 0, axis=0)
+    if not lengths.size: return 0.0
+    return round(min(1.0, np.count_nonzero(lengths >= crop.shape[1 if proposal["orientation"] == "horizontal" else 0] * .45) / 3), 2)
+
+
+def _cluster(proposals: list[dict[str, Any]], short_side: int) -> list[dict[str, Any]]:
+    clustered: list[dict[str, Any]] = []
+    distance = max(12, int(short_side * .018))
+    for proposal in sorted(proposals, key=lambda item: item["width_px"], reverse=True):
+        existing = next((item for item in clustered if item["orientation"] == proposal["orientation"] and abs(item["position_px"]["x"] - proposal["position_px"]["x"]) <= distance and abs(item["position_px"]["y"] - proposal["position_px"]["y"]) <= distance), None)
+        if existing:
+            existing["merged_proposal_ids"].append(proposal["proposal_id"])
+            existing["support_count"] += 1
+            existing["exterior_wall"] = existing["exterior_wall"] or proposal["exterior_wall"]
+        else:
+            proposal["merged_proposal_ids"] = [proposal["proposal_id"]]
+            proposal["support_count"] = 1
+            clustered.append(proposal)
+    return clustered
+
+
+def extract_opening_candidates_v2(wall_mask: np.ndarray, binary: np.ndarray, regions: list[dict[str, Any]], *, scale_x_m_per_px: float, scale_y_m_per_px: float, W: int, H: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Return V2 candidates plus proposal-stage counts; V1 remains untouched."""
+    exterior = _exterior_sides(regions, W, H)
+    raw = []
+    min_gap, max_gap = max(10, int(min(W, H) * .018)), max(70, int(min(W, H) * .23))
+    for index, region in enumerate(regions):
+        for side in ("top", "bottom", "left", "right"):
+            x1, y1, x2, y2, axis = _wall_bounds(region, side)
+            for start, end in _gaps(_profile(wall_mask, x1, y1, x2, y2, axis), min_gap, max_gap):
+                width = end - start
+                px, py = _point(region, side, start, end)
+                raw.append({"proposal_id": f"v2_raw_{index}_{side}_{start}_{end}", "room_id": f"room_{index+1}", "region_index": index, "side": side, "wall_location": side, "orientation": _orientation(side), "position_px": {"x": round(px, 1), "y": round(py, 1)}, "endpoints_px": _endpoints(region, side, start, end), "width_px": width, "exterior_wall": (index, side) in exterior})
+    clustered = _cluster(raw, min(W, H))
+    candidates = []
+    for proposal in clustered:
+        region = regions[proposal["region_index"]]
+        fixture_penalty = round(min(1.0, _inner_ink_density(binary, proposal, region) * 3.0), 2)
+        parallel_score = _parallel_line_score(binary, proposal) if proposal["exterior_wall"] else 0.0
+        relative_width = proposal["width_px"] / max(min(region["w"], region["h"]), 1)
+        width_score = round(min(1.0, relative_width / .35), 2)
+        kind = None
+        if proposal["exterior_wall"] and parallel_score >= .33 and fixture_penalty < .72:
+            kind = "window"
+        elif (not proposal["exterior_wall"] and proposal["width_px"] >= max(22, int(min(W, H) * .035)) and fixture_penalty < .36):
+            kind = "door"
+        elif proposal["exterior_wall"] and proposal["width_px"] >= max(40, int(min(W, H) * .07)) and fixture_penalty < .42:
+            kind = "door"
+        if not kind:
+            continue
+        confidence = .30 + .20 * width_score + .20 * min(1.0, proposal["support_count"] / 2) + (.22 * parallel_score if kind == "window" else .12 * (1 - fixture_penalty))
+        scale = scale_x_m_per_px if proposal["orientation"] == "horizontal" else scale_y_m_per_px
+        candidates.append({"id": f"opening_v2_{kind}_{proposal['proposal_id']}", "type": kind, "room_id": proposal["room_id"], "position_px": proposal["position_px"], "side": proposal["side"], "wall_location": proposal["wall_location"], "offset_px": None, "width_px": proposal["width_px"], "approx_width_m": round(proposal["width_px"] * scale, 2), "scale_x_m_per_px": round(scale_x_m_per_px, 8), "scale_y_m_per_px": round(scale_y_m_per_px, 8), "confidence": round(min(.92, confidence), 2), "detection_method": "exterior_wall_aware_v2", "provenance": {"source": "cv_wall_mask", "version": "v2", "raw_proposal_ids": proposal["merged_proposal_ids"], "evidence": {"gap_score": 1.0, "exterior_wall": proposal["exterior_wall"], "parallel_line_score": parallel_score, "width_score": width_score, "fixture_noise_penalty": fixture_penalty, "wall_continuity_score": round(min(1.0, proposal["support_count"] / 2), 2)}}, "verification_status": "pending", "endpoints_px": proposal["endpoints_px"]})
+    return candidates, {"raw_proposals": len(raw), "deduplicated_proposals": len(clustered), "final_candidates": len(candidates)}
+
