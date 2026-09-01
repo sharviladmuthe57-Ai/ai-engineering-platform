@@ -46,6 +46,8 @@ def render(image_path: Path, annotation_path: Path, output_path: Path, opening_d
                 _line(canvas, item, (30, 180, 30), f"M:{kind[0]} {float(item.get('confidence', 0)):.2f}")
         for item in metrics["false_negatives"]:
             _line(canvas, item, (220, 0, 220), f"MISS:{kind[0]}")
+    for item in result.get("uncertain_opening_candidates", []):
+        _line(canvas, item, (130, 130, 130), f"U {float(item.get('confidence', 0)):.2f}")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(output_path), canvas)
 
@@ -55,7 +57,7 @@ def main() -> None:
     parser.add_argument("image", type=Path)
     parser.add_argument("annotation", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--detector", choices=("v1", "v2"), default="v1")
+    parser.add_argument("--detector", choices=("v1", "v2", "v3"), default="v1")
     args = parser.parse_args()
     render(args.image, args.annotation, args.output, args.detector)
 
