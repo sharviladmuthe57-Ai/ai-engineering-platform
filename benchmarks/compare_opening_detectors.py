@@ -18,7 +18,7 @@ def main() -> None:
         annotation = image.with_suffix(".annotation.json")
         results[image.stem] = {
             detector: run_plan(image, annotation, opening_detector=detector)
-            for detector in ("v1", "v2")
+            for detector in ("v1", "v2", "v3")
         }
     print(json.dumps(results, indent=2))
 
