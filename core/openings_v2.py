@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from .openings import _gaps, _profile
+from .opening_symbols import classify_symbol_aware
 
 
 def _orientation(side: str) -> str:
@@ -99,7 +100,7 @@ def _cluster(proposals: list[dict[str, Any]], short_side: int) -> list[dict[str,
     return clustered
 
 
-def extract_opening_candidates_v2(wall_mask: np.ndarray, binary: np.ndarray, regions: list[dict[str, Any]], *, scale_x_m_per_px: float, scale_y_m_per_px: float, W: int, H: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
+def extract_opening_candidates_v2(wall_mask: np.ndarray, binary: np.ndarray, regions: list[dict[str, Any]], *, scale_x_m_per_px: float, scale_y_m_per_px: float, W: int, H: int, symbol_aware: bool = False) -> tuple[list[dict[str, Any]], dict[str, int]]:
     """Return V2 candidates plus proposal-stage counts; V1 remains untouched."""
     exterior = _exterior_sides(regions, W, H)
     raw = []
@@ -119,17 +120,31 @@ def extract_opening_candidates_v2(wall_mask: np.ndarray, binary: np.ndarray, reg
         parallel_score = _parallel_line_score(binary, proposal) if proposal["exterior_wall"] else 0.0
         relative_width = proposal["width_px"] / max(min(region["w"], region["h"]), 1)
         width_score = round(min(1.0, relative_width / .35), 2)
-        kind = None
-        if proposal["exterior_wall"] and parallel_score >= .33 and fixture_penalty < .72:
-            kind = "window"
-        elif (not proposal["exterior_wall"] and proposal["width_px"] >= max(22, int(min(W, H) * .035)) and fixture_penalty < .36):
-            kind = "door"
-        elif proposal["exterior_wall"] and proposal["width_px"] >= max(40, int(min(W, H) * .07)) and fixture_penalty < .42:
-            kind = "door"
-        if not kind:
-            continue
-        confidence = .30 + .20 * width_score + .20 * min(1.0, proposal["support_count"] / 2) + (.22 * parallel_score if kind == "window" else .12 * (1 - fixture_penalty))
+        symbol_evidence = None
+        if symbol_aware:
+            v2_window_eligible = proposal["exterior_wall"] and parallel_score >= .33 and fixture_penalty < .72
+            v2_door_eligible = ((not proposal["exterior_wall"] and proposal["width_px"] >= max(22, int(min(W, H) * .035)) and fixture_penalty < .36) or (proposal["exterior_wall"] and proposal["width_px"] >= max(40, int(min(W, H) * .07)) and fixture_penalty < .42))
+            symbol_evidence = classify_symbol_aware(
+                binary, wall_mask, proposal, region, exterior_score=float(proposal["exterior_wall"]),
+                parallel_window_score=parallel_score, fixture_noise_penalty=fixture_penalty,
+                v2_door_eligible=v2_door_eligible, v2_window_eligible=v2_window_eligible)
+            kind = str(symbol_evidence["classification"])
+            confidence = float(symbol_evidence["confidence"])
+        else:
+            kind = None
+            if proposal["exterior_wall"] and parallel_score >= .33 and fixture_penalty < .72:
+                kind = "window"
+            elif (not proposal["exterior_wall"] and proposal["width_px"] >= max(22, int(min(W, H) * .035)) and fixture_penalty < .36):
+                kind = "door"
+            elif proposal["exterior_wall"] and proposal["width_px"] >= max(40, int(min(W, H) * .07)) and fixture_penalty < .42:
+                kind = "door"
+            if not kind:
+                continue
+            confidence = .30 + .20 * width_score + .20 * min(1.0, proposal["support_count"] / 2) + (.22 * parallel_score if kind == "window" else .12 * (1 - fixture_penalty))
         scale = scale_x_m_per_px if proposal["orientation"] == "horizontal" else scale_y_m_per_px
-        candidates.append({"id": f"opening_v2_{kind}_{proposal['proposal_id']}", "type": kind, "room_id": proposal["room_id"], "position_px": proposal["position_px"], "side": proposal["side"], "wall_location": proposal["wall_location"], "offset_px": None, "width_px": proposal["width_px"], "approx_width_m": round(proposal["width_px"] * scale, 2), "scale_x_m_per_px": round(scale_x_m_per_px, 8), "scale_y_m_per_px": round(scale_y_m_per_px, 8), "confidence": round(min(.92, confidence), 2), "detection_method": "exterior_wall_aware_v2", "provenance": {"source": "cv_wall_mask", "version": "v2", "raw_proposal_ids": proposal["merged_proposal_ids"], "evidence": {"gap_score": 1.0, "exterior_wall": proposal["exterior_wall"], "parallel_line_score": parallel_score, "width_score": width_score, "fixture_noise_penalty": fixture_penalty, "wall_continuity_score": round(min(1.0, proposal["support_count"] / 2), 2)}}, "verification_status": "pending", "endpoints_px": proposal["endpoints_px"]})
+        evidence = {"gap_score": 1.0, "exterior_wall": proposal["exterior_wall"], "parallel_line_score": parallel_score, "width_score": width_score, "fixture_noise_penalty": fixture_penalty, "wall_continuity_score": round(min(1.0, proposal["support_count"] / 2), 2)}
+        if symbol_evidence:
+            evidence.update(symbol_evidence)
+        candidates.append({"id": f"opening_v2_{kind}_{proposal['proposal_id']}", "type": kind, "room_id": proposal["room_id"], "position_px": proposal["position_px"], "side": proposal["side"], "wall_location": proposal["wall_location"], "offset_px": None, "width_px": proposal["width_px"], "approx_width_m": round(proposal["width_px"] * scale, 2), "scale_x_m_per_px": round(scale_x_m_per_px, 8), "scale_y_m_per_px": round(scale_y_m_per_px, 8), "confidence": round(min(.92, confidence), 2), "detection_method": "symbol_aware_opening_v3" if symbol_aware else "exterior_wall_aware_v2", "provenance": {"source": "cv_wall_mask", "version": "v3" if symbol_aware else "v2", "raw_proposal_ids": proposal["merged_proposal_ids"], "evidence": evidence}, "verification_status": "pending", "endpoints_px": proposal["endpoints_px"]})
     return candidates, {"raw_proposals": len(raw), "deduplicated_proposals": len(clustered), "final_candidates": len(candidates)}
 
