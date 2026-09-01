@@ -109,12 +109,12 @@ def confidence_distribution(candidates: list[dict[str, Any]]) -> dict[str, int]:
     return buckets
 
 
-def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, Any]:
+def run_plan(image_path: str | Path, annotation_path: str | Path, opening_detector: str = "v1") -> dict[str, Any]:
     """Run the unchanged CV entry point and compare its output to annotations."""
     from core.cv_analyzer import analyze_floor_plan
 
     annotation = load_annotation(annotation_path)
-    cv_result = analyze_floor_plan(str(image_path))
+    cv_result = analyze_floor_plan(str(image_path), opening_detector=opening_detector)
     if not cv_result["success"]:
         return {"plan_id": annotation["plan_id"], "success": False, "error": cv_result.get("error")}
 
@@ -123,6 +123,7 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
     expected = annotation["annotations"]["expected"]
     return {
         "plan_id": annotation["plan_id"],
+        "opening_detector": opening_detector,
         "success": True,
         "dimensions_and_scale": {
             "drawing_dimensions": annotation["drawing_dimensions"],
@@ -131,7 +132,6 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
             "scale_note": "The runner does not convert annotated feet labels into metres.",
         },
         "detected_rooms": data.get("rooms", []),
-        "space_candidates": data.get("space_candidates", []),
         "detected_door_candidates": [item for item in candidates if item["type"] == "door"],
         "detected_window_candidates": [item for item in candidates if item["type"] == "window"],
         "room_detection": room_detection_result(data.get("rooms", []), expected["rooms"]),
@@ -142,3 +142,4 @@ def run_plan(image_path: str | Path, annotation_path: str | Path) -> dict[str, A
         "confidence_distribution": confidence_distribution(candidates),
         "annotation_status": annotation["annotations"],
     }
+
