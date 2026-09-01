@@ -76,7 +76,7 @@ def analyze_floor_plan(image_path: str,
     raw_regions = find_room_regions(wall_mask, W, H)
     regions, space_candidates = classify_space_candidates(
         raw_regions, binary, wall_mask, W, H)
-    print(f"[CV] Regions found: {len(regions)}")
+    print(f"[CV] Regions found: {len(regions)} (raw: {len(raw_regions)})")
 
     # 4. OCR — attempt, use if successful, skip if not
     ocr_labels = []
@@ -103,7 +103,7 @@ def analyze_floor_plan(image_path: str,
     # 7. Elements (CCTV cameras etc.)
     elements = detect_elements(img, gray, scale, H)
 
-    # 8. Opening candidates are additive; legacy room openings remain intact.
+    # 8. Opening candidates are additive; V1 remains the immutable default.
     if opening_detector == "v2":
         opening_candidates, opening_debug = extract_opening_candidates_v2(
             wall_mask, binary, regions, scale_x_m_per_px=scale,
@@ -179,28 +179,31 @@ def preprocess(img):
 #  2. WALL MASK
 # ═════════════════════════════════════════════════════════════════════════════
 def make_wall_mask(binary, W, H):
-    # Structural walls are long, mostly horizontal/vertical strokes.  Isolate
+    # Structural walls are long, mostly horizontal/vertical strokes. Isolate
     # them before closing gaps so furniture outlines, text and sanitary
     # symbols do not become miniature room boundaries.
     short_side = min(W, H)
     line_len = max(18, int(short_side * 0.035))
-    h_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN,
-                               cv2.getStructuringElement(cv2.MORPH_RECT, (line_len, 1)))
-    v_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN,
-                               cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_len)))
+    h_lines = cv2.morphologyEx(
+        binary, cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (line_len, 1)))
+    v_lines = cv2.morphologyEx(
+        binary, cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_len)))
     structural = cv2.bitwise_or(h_lines, v_lines)
 
-    # Scale closing relative to the rendered plan, with a smaller dilation than
-    # the legacy mask.  Door gaps are sealed for flood/CC segmentation while
-    # thin real partitions remain represented by their long line support.
+    # Close drawing-scale gaps in supported wall lines, then apply only modest
+    # dilation. This closes doorway breaks for component segmentation without
+    # erasing thin internal partitions.
     plan_diag = (W * W + H * H) ** 0.5
     kern_sz = max(3, min(9, int(plan_diag / 120)))
     k_close = cv2.getStructuringElement(cv2.MORPH_RECT, (kern_sz, kern_sz))
-    k_dil = cv2.getStructuringElement(cv2.MORPH_RECT, (max(2, kern_sz // 2), max(2, kern_sz // 2)))
+    k_dil = cv2.getStructuringElement(
+        cv2.MORPH_RECT, (max(2, kern_sz // 2), max(2, kern_sz // 2)))
     closed = cv2.morphologyEx(structural, cv2.MORPH_CLOSE, k_close, iterations=2)
     wall = cv2.dilate(closed, k_dil, iterations=1)
 
-    # Remove tiny noise blobs
+    # Remove tiny noise blobs.
     nb, out, stats, _ = cv2.connectedComponentsWithStats(wall, connectivity=8)
     result = np.zeros_like(wall)
     min_sz = H * W * 0.0002
@@ -209,7 +212,6 @@ def make_wall_mask(binary, W, H):
             result[out == i] = 255
     return result
 
-
 # ═════════════════════════════════════════════════════════════════════════════
 #  3. ROOM REGIONS
 # ═════════════════════════════════════════════════════════════════════════════
@@ -217,48 +219,52 @@ def find_room_regions(wall_mask, W, H):
     floor = cv2.bitwise_not(wall_mask)
 
     # Strip the drawing/page border. The actual plan is normally inset from it.
-    bw = max(3, W//60)
-    bh = max(3, H//60)
-    floor[:bh, :]=0; floor[-bh:,:]=0
-    floor[:,:bw]=0;  floor[:,-bw:]=0
+    bw = max(3, W // 60)
+    bh = max(3, H // 60)
+    floor[:bh, :] = 0
+    floor[-bh:, :] = 0
+    floor[:, :bw] = 0
+    floor[:, -bw:] = 0
 
     num, labels, stats, centroids = cv2.connectedComponentsWithStats(
         floor, connectivity=4)
 
-    total  = W * H
+    total = W * H
     min_room_px = max(MIN_ROOM_PX, int(total * 0.003))
     min_room_span = max(12, int(min(W, H) * 0.045))
-    regions= []
+    regions = []
     for i in range(1, num):
         area = int(stats[i, cv2.CC_STAT_AREA])
-        if area < min_room_px:          continue
-        if area / total > MAX_FRAC:     continue
-        x  = int(stats[i, cv2.CC_STAT_LEFT])
-        y  = int(stats[i, cv2.CC_STAT_TOP])
+        if area < min_room_px:
+            continue
+        if area / total > MAX_FRAC:
+            continue
+        x = int(stats[i, cv2.CC_STAT_LEFT])
+        y = int(stats[i, cv2.CC_STAT_TOP])
         rw = int(stats[i, cv2.CC_STAT_WIDTH])
         rh = int(stats[i, cv2.CC_STAT_HEIGHT])
+
         # Long closet/furniture slivers are not occupiable rooms. The limit is
-        # resolution-relative and deliberately below the short span of the
-        # benchmark bathrooms and utility spaces.
+        # scale-relative and deliberately permits compact bathrooms/WCs.
         if min(rw, rh) < min_room_span:
             continue
         cx, cy = float(centroids[i][0]), float(centroids[i][1])
-        # Skip extremely thin slivers
-        asp = max(rw,rh)/max(min(rw,rh),1)
-        if asp > 12 and area < 10000: continue
+        asp = max(rw, rh) / max(min(rw, rh), 1)
+        if asp > 12 and area < 10000:
+            continue
 
-        # Drawing margins, dimension bands and the page/exterior envelope can
-        # survive the border strip as large connected components.  They are
-        # identified only by page-relative geometry; no plan-specific room
-        # count, coordinate or physical-dimension assumption is used here.
+        # Dimension bands and the page/exterior envelope can survive the
+        # border strip. Reject only page-relative edge artifacts; no plan-
+        # specific count, coordinate, or physical-dimension assumption is used.
         wf, hf = rw / W, rh / H
         near_left_or_right = min(x, W - (x + rw)) < W * 0.04
         near_top_or_bottom = min(y, H - (y + rh)) < H * 0.04
         if wf > 0.90 and hf > 0.90:
             continue
         if ((wf < 0.08 and hf > 0.70 and near_left_or_right) or
-            (hf < 0.08 and wf > 0.70 and near_top_or_bottom)):
+                (hf < 0.08 and wf > 0.70 and near_top_or_bottom)):
             continue
+
         component = np.where(labels == i, 255, 0).astype(np.uint8)
         contours, _ = cv2.findContours(component, cv2.RETR_EXTERNAL,
                                        cv2.CHAIN_APPROX_SIMPLE)
@@ -267,22 +273,23 @@ def find_room_regions(wall_mask, W, H):
         approximation = cv2.approxPolyDP(contour, epsilon, True)
         polygon = [[int(point[0][0]), int(point[0][1])]
                    for point in approximation]
-        regions.append({"x":x,"y":y,"w":rw,"h":rh,
-                         "area":area,"cx":cx,"cy":cy,
-                         "polygon":polygon})
+        regions.append({"x": x, "y": y, "w": rw, "h": rh,
+                        "area": area, "cx": cx, "cy": cy,
+                        "polygon": polygon})
 
     regions.sort(key=lambda r: r["area"], reverse=True)
     return regions
-
 
 def _boundary_support(wall_mask, region):
     """Fraction of the candidate boundary backed by structural wall pixels."""
     x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
     pad = 2
-    samples = [wall_mask[max(0, y-pad):min(wall_mask.shape[0], y+pad+1), x:x+w],
-               wall_mask[max(0, y+h-pad):min(wall_mask.shape[0], y+h+pad+1), x:x+w],
-               wall_mask[y:y+h, max(0, x-pad):min(wall_mask.shape[1], x+pad+1)],
-               wall_mask[y:y+h, max(0, x+w-pad):min(wall_mask.shape[1], x+w+pad+1)]]
+    samples = [
+        wall_mask[max(0, y-pad):min(wall_mask.shape[0], y+pad+1), x:x+w],
+        wall_mask[max(0, y+h-pad):min(wall_mask.shape[0], y+h+pad+1), x:x+w],
+        wall_mask[y:y+h, max(0, x-pad):min(wall_mask.shape[1], x+pad+1)],
+        wall_mask[y:y+h, max(0, x+w-pad):min(wall_mask.shape[1], x+w+pad+1)],
+    ]
     return [float(np.count_nonzero(sample > 0)) / sample.size if sample.size else 0.0
             for sample in samples]
 
@@ -303,8 +310,9 @@ def _crossed_void_marker(binary, region):
     """Conservative X-marker signal used on plans that label a floor void."""
     x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
     roi = binary[y:y+h, x:x+w]
-    lines = cv2.HoughLinesP(roi, 1, np.pi / 180, threshold=max(10, min(w, h)//5),
-                            minLineLength=max(10, min(w, h)//3), maxLineGap=8)
+    lines = cv2.HoughLinesP(
+        roi, 1, np.pi / 180, threshold=max(10, min(w, h)//5),
+        minLineLength=max(10, min(w, h)//3), maxLineGap=8)
     if lines is None:
         return False
     slopes = []
@@ -332,7 +340,8 @@ def classify_space_candidates(regions, binary, wall_mask, W, H):
 
         if aspect > 3.2 and _crossed_void_marker(binary, candidate):
             classification, confidence, evidence = "void", 0.90, ["crossed_void_marker"]
-        elif _repeated_line_pattern(binary, candidate) and min(w, h) > min(W, H) * .10:
+        elif (_repeated_line_pattern(binary, candidate) and
+              min(w, h) > min(W, H) * .10):
             # Repeated lines also occur in bedrooms, bathrooms and window bands.
             # Keep these candidates until a stair classifier has stronger evidence.
             classification, confidence, evidence = "uncertain", 0.45, ["repeated_internal_lines"]
@@ -527,11 +536,11 @@ def build_rooms(regions, ocr_labels, scale, scale_y, H, W, wall_mask, warnings):
             # Additive raw-image geometry for benchmark/review consumers. The
             # legacy metre-space room contract remains unchanged.
             "geometry_px": {
-                "bbox": {"x":reg["x"],"y":reg["y"],
-                         "width":reg["w"],"height":reg["h"]},
+                "bbox": {"x": reg["x"], "y": reg["y"],
+                         "width": reg["w"], "height": reg["h"]},
                 "polygon": reg.get("polygon", []),
-                "centroid": {"x":round(reg["cx"],2),
-                             "y":round(reg["cy"],2)},
+                "centroid": {"x": round(reg["cx"], 2),
+                             "y": round(reg["cy"], 2)},
                 "area": reg["area"],
             },
             "doors"  : doors,
@@ -636,4 +645,3 @@ if __name__=="__main__":
         for rm in r["data"]["rooms"]:
             print(f'  {rm["name"]:14} {rm["width"]:.1f}×{rm["height"]:.1f}m')
     else: print("FAIL:",r["error"])
-
