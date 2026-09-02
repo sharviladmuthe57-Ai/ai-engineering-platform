@@ -37,7 +37,7 @@ ROOM_FILL = {
 # ═════════════════════════════════════════════════════════════════════════════
 #  MAIN ENTRY POINT
 # ═════════════════════════════════════════════════════════════════════════════
-def generate_layout(vision_data: dict, project_type: str = "electrical", routing_version: str = "v2") -> dict:
+def generate_layout(vision_data: dict, project_type: str = "electrical", routing_version: str = "v2.1") -> dict:
     rooms    = vision_data.get("rooms",    [])
     elements = vision_data.get("detected_elements", [])
 
@@ -83,7 +83,7 @@ def generate_layout(vision_data: dict, project_type: str = "electrical", routing
                             "controlled_transitions": [],
                         }
                     else:
-                        routing = route_component(db_pos, p, room["id"], rooms)
+                        routing = route_component(db_pos, p, room["id"], rooms, routing_version=routing_version)
                     route = routing["waypoints"]
                     routes.append({
                         "from"      : "db",

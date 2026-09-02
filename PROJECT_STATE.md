@@ -1,6 +1,6 @@
 # AI Engineering Platform — Project State
 
-Last verified: 2026-09-03 on `main` at `5f17abbb2b5a8c006bbe5a9ebc33aa0817fcba9b`.
+Last verified: 2026-09-03 on `main` at `8e5e060ea66da5ddbc13ad3c00ad6e19263e3b6f` before the pending Routing V2.1 checkpoint.
 
 This is a durable handoff for developers and coding agents. The repository, tests, and versioned fixtures are the source of truth. Statements labelled **Verified** were checked in this repository on the date above. Statements labelled **Product intent** describe direction, not shipped functionality.
 
@@ -25,7 +25,7 @@ The present system is a Phase-1 prototype, not construction-ready electrical des
 - `core/opening_symbols.py` scores local door-swing/leaf and window-band evidence for V3.
 - `core/rules_engine.py` contains deterministic room-type component rules and positional hints.
 - `core/geometry.py` places components, chooses a DB, delegates routing, and derives the BOM.
-- `core/routing.py` implements deterministic Routing V2: a room-rectangle connectivity graph, explicit narrow shared-boundary transitions, per-component room-aware paths, and declared V1 fallback metadata.
+- `core/routing.py` implements deterministic Routing V2.1: a room-rectangle connectivity graph, validated door/opening portals where available, conservative geometric transitions otherwise, per-component room-aware paths, and declared V1 fallback metadata.
 - `core/renderer.py` and `core/symbols.py` render the electrical PNG. `static/index.html` is the upload and verification UI.
 - `core/ocr_reader.py` is a standalone Tesseract helper and is not wired into `app.py`'s upload route.
 
@@ -49,11 +49,11 @@ Engineer verification in static/index.html
   → only accepted candidates adapted to legacy rooms[].doors/windows
   → generate_layout()
   → deterministic component rules and placement
-  → Routing V2 room-connectivity path (or explicit V1 fallback)
+  → Routing V2.1 room-connectivity path (or explicit V1 fallback)
   → BOM + renderer PNG + completed job response
 ```
 
-The upload API does not select V2 or V3; `analyze_floor_plan` defaults to V1. V2/V3 are implemented opt-in paths used by the benchmark tooling. Routing V2 is the default electrical layout path; `routing_version="v1"` remains available only for comparison/fallback auditing.
+The upload API does not select V2 or V3; `analyze_floor_plan` defaults to V1. V2/V3 are implemented opt-in paths used by the benchmark tooling. Routing V2.1 is the default electrical layout path; `routing_version="v1"` remains available only for comparison/fallback auditing.
 
 ## 5. Data model and compatibility rule
 
@@ -107,7 +107,7 @@ V3 emitted 52 uncertain pending proposals (17, 18, and 17 by plan). None was acc
 
 ## 9. Electrical engine status
 
-**Verified.** `rules_engine.py` maps room labels to static components and positional hints. `geometry.py` generates each component, selects a DB by choosing the room closest to the origin and placing the DB near that room's left wall, and delegates to Routing V2 by default. It applies `BUFFER = 1.15` to route length.
+**Verified.** `rules_engine.py` maps room labels to static components and positional hints. `geometry.py` generates each component, selects a DB by choosing the room closest to the origin and placing the DB near that room's left wall, and delegates to Routing V2.1 by default. It applies `BUFFER = 1.15` to route length.
 
 The engine supports lights, fans, one-/two-way switches, sockets, AC and appliance points, DB, and optional CCTV/NVR output depending on project type. It is a deterministic first-draft generator, not code-compliant circuit/load engineering.
 
@@ -133,18 +133,20 @@ Placement audit results:
 
 Switch-near-door measurements describe legacy room doors only. All benchmark V3 candidates were pending and zero were accepted.
 
-## Routing V2 implementation and benchmark
+## Routing V2.1 implementation and benchmark
 
-**Verified on 2026-09-03.** Routing V2 preserves the public `waypoints` and `length_m` route fields, then adds `routing_version`, `architecture_aware`, `fallback_used`, `fallback_reason`, source/target/traversed rooms, and controlled-transition metadata. It builds a deterministic graph from the detected room rectangles:
+**Verified on 2026-09-03.** Routing V2.1 preserves the public `waypoints` and `length_m` route fields, then adds `routing_version`, `architecture_aware`, `fallback_used`, `fallback_reason`, source/target/traversed rooms, and controlled-transition metadata. It builds a deterministic graph from the detected room rectangles:
 
 - overlapping rooms connect through their common area;
-- boundaries with a shared span and a gap of at most 0.25 m become explicit, measurable controlled transitions;
+- for an otherwise valid shared/near boundary, an accepted opening is preferred, then a legacy door/opening, then a geometric portal; accepted candidates carry their candidate ID and provenance;
+- pending, uncertain, and rejected candidates are not adapted into legacy rooms and therefore cannot form portals;
+- geometry-only transitions still require a shared span and a gap of at most 0.25 m, and are marked as `geometric_fallback`;
 - every intra-room leg is a deterministic Manhattan segment inside the current room rectangle;
 - a disconnected graph uses the preserved V1 Manhattan route and declares the fallback; it never silently reports that as architecture-aware.
 
-Pending/rejected V3 candidates remain unused. Existing placement/rules were not changed.
+The transition records disclose `portal_id`, portal type/provenance, trust class, and whether a geometric fallback was used. The graph and Dijkstra tie-breaking are deterministic. A missing room-graph path still uses the explicit declared V1 fallback. Existing placement/rules were not changed.
 
-The benchmark runner now emits both V1 and V2 overlays and a `routing_comparison` for every plan. `outside_building_routes` evaluates the V2 modeled routing domain (room rectangles plus explicit narrow transitions); `outside_room_union_routes` remains available to disclose any path samples in a transition gap rather than hiding them.
+The benchmark runner now emits V1, V2, and V2.1 overlays and a `routing_comparison` for every plan. `outside_building_routes` evaluates the modeled routing domain (room rectangles plus explicit transitions); `outside_room_union_routes` remains available to disclose any path samples in a transition gap rather than hiding them.
 
 | Plan | Raw route m V1 → V2 | Wire m V1 → V2 | Outside modeled domain V1 → V2 | Suspicious V1 → V2 | Fallbacks | Architecture-aware V2 |
 | --- | --- | --- | --- | ---: | ---: |
@@ -154,6 +156,16 @@ The benchmark runner now emits both V1 and V2 overlays and a `routing_comparison
 
 The V2 overlays remove the exterior-crossing full-plan star lines and show routes travelling through the room graph. Route length increases by roughly 11–20%; this is reported rather than concealed. V2 still records strict room-union excursions (33, 3, and 83 routes) where paths use explicit near-boundary transitions. The remaining modeled-domain failures are five switch routes whose existing placements sit at/outside room boundaries; placement was deliberately not changed.
 
+V2.1 was benchmarked against the same fixtures and V2 output. No fixture had an accepted candidate, so trusted accepted-opening transitions are zero; the run still validates the accepted-opening path with unit tests. Legacy doors replaced a meaningful share of geometric portals, preserving or improving containment without changing CV, placement, 2D/3D, or BOQ formulas.
+
+| Plan | Routes V2 → V2.1 | Raw m V2 → V2.1 | Wire m V2 → V2.1 | Outside / suspicious V2 → V2.1 | Accepted / legacy / geometric / failed transitions (V2.1) |
+| --- | ---: | ---: | ---: | ---: |
+| 01 | 70 → 70 | 528.25 → 540.81 | 607.48 → 621.92 | 1 / 1 → 1 / 1 | 0 / 69 / 18 / 0 |
+| 02 | 91 → 91 | 678.71 → 662.22 | 780.48 → 761.55 | 3 / 3 → 2 / 2 | 0 / 107 / 41 / 0 |
+| 03 | 90 → 90 | 1006.15 → 1031.35 | 1157.05 → 1186.00 | 1 / 1 → 1 / 1 | 0 / 87 / 102 / 0 |
+
+The paired overlays were visually inspected. V2.1 preserves room-graph containment, routes through credible legacy doors where geometry permits, and retains geometric portals only where no usable opening supports the same boundary. Plan 02 improves by one modeled-domain/suspicious route; plans 01 and 03 are unchanged. The remaining V2.1 bad route is plan 03 `room_12_switch_1way_0` (route 78, 17.61 m raw / 20.25 m reported), an existing boundary-placement issue rather than a fallback or failed transition.
+
 ## 11. DB and routing diagnosis
 
 **Verified.** DB coordinates are (2.64, 4.61) m for plan 01, (2.01, 2.82) m for plan 02, and (1.40, 3.35) m for plan 03. The most distant raw routes are 11.00 m (plan 01 fridge), 12.73 m (plan 02 chimney; duplicated destination route IDs are possible), and 16.52 m (plan 03 AC). Each crosses multiple room regions; the longest routes in plans 01–03 respectively leave the modeled building area in the audit.
@@ -162,20 +174,19 @@ The DB heuristic remains simplistic and can worsen total length because it choos
 
 ## 12. Known failures, ordered by current severity
 
-1. **Routing transition fidelity:** Routing V2 materially improves containment, but uses geometry-only shared/near-boundary transitions and has not yet been validated against engineer-approved connectivity. It is not frozen.
-2. **Placement:** co-located components, wall-mask collisions, duplicate IDs, and boundary/outside switch placements remain; Routing V2 only reports their route impact.
-3. **Electrical rules/BOQ:** static rules and heuristic consumables are not circuit/load/code aware.
-4. **Architectural input:** room labels and legacy openings remain heuristic upstream constraints; V3 candidates are intentionally pending/inert.
+1. **Placement:** co-located components, wall-mask collisions, duplicate IDs, and boundary/outside switch placements remain; Routing V2.1 reports their route impact.
+2. **Electrical rules/BOQ:** static rules and heuristic consumables are not circuit/load/code aware.
+3. **Architectural input:** room labels and legacy openings remain heuristic upstream constraints; V3 candidates are intentionally pending/inert.
 
 ## 13. Frozen decisions and current blocker
 
-**Frozen decisions.** Preserve room segmentation V1, opening detector V3, benchmark fixtures, additive opening review, and legacy compatibility. Do not merge `recovered-sunday-tuesday` into `main`. Routing V2 is implemented but not frozen.
+**Frozen decisions.** Preserve room segmentation V1, opening detector V3, benchmark fixtures, additive opening review, and legacy compatibility. Do not merge `recovered-sunday-tuesday` into `main`. Routing V2.1 is frozen for Phase 1: it is deterministic, retains explicit V1 fallback, honors accepted/legacy openings without trusting pending/rejected candidates, and does not regress benchmark containment.
 
-**Current blocker (verified).** Routing V2 needs one evidence-driven validation/refinement pass before freezing: prefer established legacy/accepted openings where trustworthy, tighten generic near-boundary transitions, and preserve the large containment improvement. The previous architecture-blind star-routing blocker is no longer the dominant failure.
+**Current blocker (verified).** Placement quality is now the dominant Phase-1 issue: co-locations, wall-mask collisions, duplicate IDs, and boundary/outside switch placements cause the remaining modeled-domain failures. The previous architecture-blind star-routing blocker and unvalidated geometry-only transition concern are no longer dominant.
 
 ## 14. One next recommended milestone
 
-Implement and benchmark **Routing V2.1 transition validation**: use existing legacy doors and any accepted openings to score/constrain room-graph portals, reduce strict room-union excursions and the remaining endpoint violations, and keep the current containment gains. Do not change room segmentation, opening detection, or placement rules.
+Perform a narrowly scoped **placement-quality cleanup**: resolve severe component co-locations, duplicate IDs, wall-mask collisions, and boundary/outside placements while preserving frozen room segmentation, opening detection, Routing V2.1, placement quantities, 2D/3D interfaces, and BOM formulas except for resulting route lengths.
 
 ## 15. Future roadmap
 
@@ -190,7 +201,7 @@ Implement and benchmark **Routing V2.1 transition validation**: use existing leg
 .\.venv\Scripts\python.exe -m benchmarks.run_electrical_benchmark fixtures\benchmarks --output-dir <temporary-output-dir>
 ```
 
-The tracked suite passed: **35 tests, 0 failures** with OpenCV 4.10.0.84. `requirements.txt` now pins that version because the previous unbounded OpenCV dependency resolved to OpenCV 5.0.0.93 and produced 7 V3 test errors due to a `HoughLinesP` array-shape assumption. Tesseract was unavailable during benchmark regeneration; the code skipped OCR gracefully and used its existing scale fallback.
+The tracked suite passed: **39 tests, 0 failures** with OpenCV 4.10.0.84. The four added routing tests cover accepted-opening preference, pending/rejected candidate exclusion, legacy opening use, and deterministic V2.1 output; the existing disconnected graph test continues to cover declared V1 fallback. `requirements.txt` pins that version because the previous unbounded OpenCV dependency resolved to OpenCV 5.0.0.93 and produced 7 V3 test errors due to a `HoughLinesP` array-shape assumption. Tesseract was unavailable during benchmark regeneration; the code skipped OCR gracefully and used its existing scale fallback.
 
 ## 17. Important files
 
@@ -229,6 +240,7 @@ The local Git identity is `Srushti Admuthe <srushtiadmuthe1001@gmail.com>`, not 
 
 ## 21. Change log / milestones
 
+- 2026-09-03: Implemented Routing V2.1 portal validation. The default router now prefers accepted openings, then credible legacy doors, then constrained geometric portals; pending/rejected candidates remain inert. The runner produces V1/V2/V2.1 comparisons and overlays. All 39 tests passed; V2.1 improved plan 02 containment (3 to 2 bad routes) and did not regress plans 01 or 03. Routing V2.1 is frozen for Phase 1.
 - 2026-09-03: Implemented Routing V2 with a deterministic room-graph domain, explicit transition/fallback metadata, V1/V2 benchmark comparison, and paired overlays. Pin OpenCV 4.10.0.84 and correct the README fixture statement. Routing is improved but not frozen.
 - 2026-09-03: Created this verified continuity checkpoint, added targeted `.gitignore`, regenerated the electrical audit in temporary storage, and confirmed routing as the next milestone. No production algorithm changed.
 - 2026-09-01: `5f17abb` clarified the electrical benchmark overlay legend.

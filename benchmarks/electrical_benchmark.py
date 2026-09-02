@@ -202,6 +202,7 @@ def route_summary(routes: list[dict[str, Any]]) -> dict[str, Any]:
     """Stable, additive V1/V2 comparison summary for the electrical benchmark."""
     raw = [route["raw_length_m"] for route in routes]
     reported = [route["reported_length_m"] for route in routes]
+    transitions = [transition for route in routes for transition in route.get("controlled_transitions", [])]
     return {
         "route_count": len(routes),
         "total_raw_route_length_m": round(sum(raw), 2),
@@ -217,6 +218,10 @@ def route_summary(routes: list[dict[str, Any]]) -> dict[str, Any]:
         "architecture_aware_success_percent": round(100 * sum(route["architecture_aware"] and not route["fallback_used"] for route in routes) / len(routes), 1) if routes else 0.0,
         "wall_mask_samples": sum(route["wall_mask_samples"] for route in routes),
         "controlled_transition_count": sum(route["controlled_transition_count"] for route in routes),
+        "trusted_opening_transitions": sum(transition.get("portal_type") == "accepted_opening" for transition in transitions),
+        "legacy_opening_transitions": sum(transition.get("portal_type") == "legacy_opening" for transition in transitions),
+        "geometric_fallback_transitions": sum(transition.get("portal_type") == "geometric_fallback" for transition in transitions),
+        "failed_transitions": sum(route["fallback_used"] for route in routes),
         "worst_routes": [
             {key: route[key] for key in ("route_id", "destination_component_id", "raw_length_m", "reported_length_m", "outside_building", "suspicious", "fallback_used")}
             for route in sorted(routes, key=lambda route: route["raw_length_m"], reverse=True)[:5]
@@ -281,7 +286,7 @@ def _counts(records: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(values.items()))
 
 
-def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3", routing_version: str = "v2") -> dict[str, Any]:
+def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3", routing_version: str = "v2.1") -> dict[str, Any]:
     """Run frozen architecture → frozen electrical engine and audit its output."""
     if validate_expectations():
         raise ValueError("Electrical expectation schema is invalid")
