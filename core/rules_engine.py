@@ -243,3 +243,4 @@ def _outside_door(room):
         if wl=="right":  return (rx+rw+OUTSET, ry+p)
 
     return (rx - OUTSET, ry + rh/2)
+

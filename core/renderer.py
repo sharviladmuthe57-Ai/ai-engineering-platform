@@ -365,3 +365,4 @@ def _sym_size(W, H):
     """Scale symbol size relative to plan size."""
     avg = (W + H) / 2
     return max(0.15, min(0.35, avg * 0.025))
+

@@ -16,6 +16,9 @@ import numpy as np
 import re
 from pathlib import Path
 
+from .openings import extract_opening_candidates
+from .openings_v2 import extract_opening_candidates_v2
+
 try:
     import pytesseract
     OCR_AVAILABLE = True
@@ -53,7 +56,8 @@ ROOM_KEYWORDS = {
 # ═════════════════════════════════════════════════════════════════════════════
 def analyze_floor_plan(image_path: str,
                        known_width_m : float = None,
-                       known_height_m: float = None) -> dict:
+                       known_height_m: float = None,
+                       opening_detector: str = "v1") -> dict:
     warnings = []
     img = cv2.imread(str(image_path))
     if img is None:
@@ -69,7 +73,9 @@ def analyze_floor_plan(image_path: str,
     wall_mask = make_wall_mask(binary, W, H)
 
     # 3. Find enclosed room regions
-    regions = find_room_regions(wall_mask, W, H)
+    raw_regions = find_room_regions(wall_mask, W, H)
+    regions, space_candidates = classify_space_candidates(
+        raw_regions, binary, wall_mask, W, H)
     print(f"[CV] Regions found: {len(regions)}")
 
     # 4. OCR — attempt, use if successful, skip if not
@@ -97,7 +103,20 @@ def analyze_floor_plan(image_path: str,
     # 7. Elements (CCTV cameras etc.)
     elements = detect_elements(img, gray, scale, H)
 
-    # 8. Confidence
+    # 8. Opening candidates are additive; legacy room openings remain intact.
+    if opening_detector in ("v2", "v3"):
+        opening_candidates, opening_debug = extract_opening_candidates_v2(
+            wall_mask, binary, regions, scale_x_m_per_px=scale,
+            scale_y_m_per_px=scale_y, W=W, H=H,
+            symbol_aware=opening_detector == "v3")
+    else:
+        opening_candidates = extract_opening_candidates(
+            wall_mask, regions, scale_x_m_per_px=scale, scale_y_m_per_px=scale_y)
+        opening_debug = {"raw_proposals": len(opening_candidates),
+                         "deduplicated_proposals": len(opening_candidates),
+                         "final_candidates": len(opening_candidates)}
+
+    # 9. Confidence
     n_ocr = sum(1 for r in rooms if r["name"] != "unknown")
     conf  = min(0.92, 0.45 + 0.07*len(rooms) + 0.05*n_ocr)
 
@@ -113,15 +132,21 @@ def analyze_floor_plan(image_path: str,
                 "has_compound": False,
             },
             "rooms"            : rooms,
+            "space_candidates" : space_candidates,
             "detected_elements": elements,
+            "opening_candidates": opening_candidates,
+            "opening_detector": opening_detector,
             "electrical_hints" : [],
             "warnings"         : warnings,
             "_debug"           : {
                 "image_px"     : f"{W}×{H}",
                 "scale_mppx"   : round(scale, 5),
                 "regions_found": len(regions),
+                "raw_regions_found": len(raw_regions),
                 "ocr_labels"   : len(ocr_labels),
                 "rooms_final"  : len(rooms),
+                "opening_candidates": len(opening_candidates),
+                "opening_proposals": opening_debug,
             },
         }
     }
@@ -155,16 +180,26 @@ def preprocess(img):
 #  2. WALL MASK
 # ═════════════════════════════════════════════════════════════════════════════
 def make_wall_mask(binary, W, H):
-    # Adaptive kernel: larger plans need bigger kernel to close wall gaps
-    plan_diag = (W*W + H*H)**0.5
-    kern_sz   = max(5, min(14, int(plan_diag / 80)))
+    # Structural walls are long, mostly horizontal/vertical strokes.  Isolate
+    # them before closing gaps so furniture outlines, text and sanitary
+    # symbols do not become miniature room boundaries.
+    short_side = min(W, H)
+    line_len = max(18, int(short_side * 0.035))
+    h_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN,
+                               cv2.getStructuringElement(cv2.MORPH_RECT, (line_len, 1)))
+    v_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN,
+                               cv2.getStructuringElement(cv2.MORPH_RECT, (1, line_len)))
+    structural = cv2.bitwise_or(h_lines, v_lines)
 
-    k_close = cv2.getStructuringElement(cv2.MORPH_RECT,(kern_sz, kern_sz))
-    k_dil   = cv2.getStructuringElement(cv2.MORPH_RECT,(kern_sz//2+1, kern_sz//2+1))
-
-    # Close gaps in wall lines, then dilate to thicken walls
-    closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, k_close, iterations=2)
-    wall   = cv2.dilate(closed, k_dil, iterations=1)
+    # Scale closing relative to the rendered plan, with a smaller dilation than
+    # the legacy mask.  Door gaps are sealed for flood/CC segmentation while
+    # thin real partitions remain represented by their long line support.
+    plan_diag = (W * W + H * H) ** 0.5
+    kern_sz = max(3, min(9, int(plan_diag / 120)))
+    k_close = cv2.getStructuringElement(cv2.MORPH_RECT, (kern_sz, kern_sz))
+    k_dil = cv2.getStructuringElement(cv2.MORPH_RECT, (max(2, kern_sz // 2), max(2, kern_sz // 2)))
+    closed = cv2.morphologyEx(structural, cv2.MORPH_CLOSE, k_close, iterations=2)
+    wall = cv2.dilate(closed, k_dil, iterations=1)
 
     # Remove tiny noise blobs
     nb, out, stats, _ = cv2.connectedComponentsWithStats(wall, connectivity=8)
@@ -182,7 +217,7 @@ def make_wall_mask(binary, W, H):
 def find_room_regions(wall_mask, W, H):
     floor = cv2.bitwise_not(wall_mask)
 
-    # Strip border
+    # Strip the drawing/page border. The actual plan is normally inset from it.
     bw = max(3, W//60)
     bh = max(3, H//60)
     floor[:bh, :]=0; floor[-bh:,:]=0
@@ -192,24 +227,133 @@ def find_room_regions(wall_mask, W, H):
         floor, connectivity=4)
 
     total  = W * H
+    min_room_px = max(MIN_ROOM_PX, int(total * 0.003))
+    min_room_span = max(12, int(min(W, H) * 0.045))
     regions= []
     for i in range(1, num):
         area = int(stats[i, cv2.CC_STAT_AREA])
-        if area < MIN_ROOM_PX:          continue
+        if area < min_room_px:          continue
         if area / total > MAX_FRAC:     continue
         x  = int(stats[i, cv2.CC_STAT_LEFT])
         y  = int(stats[i, cv2.CC_STAT_TOP])
         rw = int(stats[i, cv2.CC_STAT_WIDTH])
         rh = int(stats[i, cv2.CC_STAT_HEIGHT])
+        # Long closet/furniture slivers are not occupiable rooms. The limit is
+        # resolution-relative and deliberately below the short span of the
+        # benchmark bathrooms and utility spaces.
+        if min(rw, rh) < min_room_span:
+            continue
         cx, cy = float(centroids[i][0]), float(centroids[i][1])
         # Skip extremely thin slivers
         asp = max(rw,rh)/max(min(rw,rh),1)
         if asp > 12 and area < 10000: continue
+
+        # Drawing margins, dimension bands and the page/exterior envelope can
+        # survive the border strip as large connected components.  They are
+        # identified only by page-relative geometry; no plan-specific room
+        # count, coordinate or physical-dimension assumption is used here.
+        wf, hf = rw / W, rh / H
+        near_left_or_right = min(x, W - (x + rw)) < W * 0.04
+        near_top_or_bottom = min(y, H - (y + rh)) < H * 0.04
+        if wf > 0.90 and hf > 0.90:
+            continue
+        if ((wf < 0.08 and hf > 0.70 and near_left_or_right) or
+            (hf < 0.08 and wf > 0.70 and near_top_or_bottom)):
+            continue
+        component = np.where(labels == i, 255, 0).astype(np.uint8)
+        contours, _ = cv2.findContours(component, cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+        contour = max(contours, key=cv2.contourArea)
+        epsilon = max(1.0, 0.005 * cv2.arcLength(contour, True))
+        approximation = cv2.approxPolyDP(contour, epsilon, True)
+        polygon = [[int(point[0][0]), int(point[0][1])]
+                   for point in approximation]
         regions.append({"x":x,"y":y,"w":rw,"h":rh,
-                         "area":area,"cx":cx,"cy":cy})
+                         "area":area,"cx":cx,"cy":cy,
+                         "polygon":polygon})
 
     regions.sort(key=lambda r: r["area"], reverse=True)
     return regions
+
+
+def _boundary_support(wall_mask, region):
+    """Fraction of the candidate boundary backed by structural wall pixels."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    pad = 2
+    samples = [wall_mask[max(0, y-pad):min(wall_mask.shape[0], y+pad+1), x:x+w],
+               wall_mask[max(0, y+h-pad):min(wall_mask.shape[0], y+h+pad+1), x:x+w],
+               wall_mask[y:y+h, max(0, x-pad):min(wall_mask.shape[1], x+pad+1)],
+               wall_mask[y:y+h, max(0, x+w-pad):min(wall_mask.shape[1], x+w+pad+1)]]
+    return [float(np.count_nonzero(sample > 0)) / sample.size if sample.size else 0.0
+            for sample in samples]
+
+
+def _repeated_line_pattern(binary, region):
+    """Detect multiple long, similarly oriented internal strokes (stairs)."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    inset = max(4, min(w, h) // 16)
+    roi = binary[y+inset:y+h-inset, x+inset:x+w-inset]
+    if roi.size == 0:
+        return False
+    horizontal = np.count_nonzero(np.sum(roi > 0, axis=1) >= roi.shape[1] * 0.55)
+    vertical = np.count_nonzero(np.sum(roi > 0, axis=0) >= roi.shape[0] * 0.55)
+    return max(horizontal, vertical) >= 5
+
+
+def _crossed_void_marker(binary, region):
+    """Conservative X-marker signal used on plans that label a floor void."""
+    x, y, w, h = (region[key] for key in ("x", "y", "w", "h"))
+    roi = binary[y:y+h, x:x+w]
+    lines = cv2.HoughLinesP(roi, 1, np.pi / 180, threshold=max(10, min(w, h)//5),
+                            minLineLength=max(10, min(w, h)//3), maxLineGap=8)
+    if lines is None:
+        return False
+    slopes = []
+    for x1, y1, x2, y2 in lines[:, 0]:
+        if x2 == x1:
+            continue
+        slope = (y2-y1) / (x2-x1)
+        if 0.25 < abs(slope) < 4:
+            slopes.append(slope)
+    return any(slope > 0 for slope in slopes) and any(slope < 0 for slope in slopes)
+
+
+def classify_space_candidates(regions, binary, wall_mask, W, H):
+    """Classify raw connected components without altering segmentation itself."""
+    kept, candidates = [], []
+    for index, region in enumerate(regions, start=1):
+        candidate = dict(region)
+        candidate["id"] = f"space_candidate_{index}"
+        x, y, w, h = (candidate[key] for key in ("x", "y", "w", "h"))
+        supports = _boundary_support(wall_mask, candidate)
+        weak_sides = sum(value < 0.35 for value in supports)
+        aspect = max(w, h) / max(min(w, h), 1)
+        fill_ratio = candidate["area"] / max(w * h, 1)
+        classification, confidence, evidence = "occupiable", 0.55, []
+
+        if aspect > 3.2 and _crossed_void_marker(binary, candidate):
+            classification, confidence, evidence = "void", 0.90, ["crossed_void_marker"]
+        elif _repeated_line_pattern(binary, candidate) and min(w, h) > min(W, H) * .10:
+            # Repeated lines also occur in bedrooms, bathrooms and window bands.
+            # Keep these candidates until a stair classifier has stronger evidence.
+            classification, confidence, evidence = "uncertain", 0.45, ["repeated_internal_lines"]
+        elif (aspect > 3.5 and min(w, h) > min(W, H) * .10 and
+              weak_sides >= 2 and fill_ratio < .82):
+            classification, confidence, evidence = "circulation", 0.80, ["elongated", "weak_boundary_support"]
+        elif fill_ratio < .38 and candidate["area"] < W * H * .012 and weak_sides >= 2:
+            classification, confidence, evidence = "artifact", 0.72, ["low_fill", "weak_boundary_support"]
+        elif (x < W * .05 or y < H * .05 or x + w > W * .95 or y + h > H * .95) and weak_sides <= 1:
+            classification, confidence, evidence = "semi_exterior", 0.55, ["exterior_boundary_contact"]
+        elif weak_sides >= 3:
+            classification, confidence, evidence = "uncertain", 0.45, ["limited_boundary_support"]
+
+        candidate["space_class"] = classification
+        candidate["classification_confidence"] = confidence
+        candidate["classification_evidence"] = evidence
+        candidates.append(candidate)
+        if classification not in {"void", "stair", "circulation", "artifact"}:
+            kept.append(candidate)
+    return kept, candidates
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -378,6 +522,19 @@ def build_rooms(regions, ocr_labels, scale, scale_y, H, W, wall_mask, warnings):
             "height" : max(0.5, h_m),
             "area_m2": round(w_m*h_m, 1),
             "shape"  : "rectangle",
+            "space_class": reg.get("space_class", "occupiable"),
+            "classification_confidence": reg.get("classification_confidence", 0.0),
+            "classification_evidence": reg.get("classification_evidence", []),
+            # Additive raw-image geometry for benchmark/review consumers. The
+            # legacy metre-space room contract remains unchanged.
+            "geometry_px": {
+                "bbox": {"x":reg["x"],"y":reg["y"],
+                         "width":reg["w"],"height":reg["h"]},
+                "polygon": reg.get("polygon", []),
+                "centroid": {"x":round(reg["cx"],2),
+                             "y":round(reg["cy"],2)},
+                "area": reg["area"],
+            },
             "doors"  : doors,
             "windows": windows,
         })

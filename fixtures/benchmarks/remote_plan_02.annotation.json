@@ -1,0 +1,906 @@
+{
+  "schema_version": "1.2",
+  "plan_id": "plan_02",
+  "fixture": {
+    "file": "plan_02.png",
+    "sha256": "E679CA1047508EE062A79FFEE59A498415F00FFE564A3F3AD4855F1FCEB1F928",
+    "pixel_dimensions": {
+      "width": 1190,
+      "height": 891
+    },
+    "integrity": "byte-identical copy of user supplied PNG"
+  },
+  "drawing_dimensions": {
+    "status": "annotated_from_visible_drawing_text",
+    "value": "50' × 40'",
+    "unit": "feet",
+    "used_as_pipeline_input": false
+  },
+  "annotations": {
+    "expected": {
+      "rooms": [
+        {
+          "id": "expected_room_1",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_2",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_3",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_4",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_5",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_6",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_7",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_8",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_9",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_10",
+          "type": "bathroom",
+          "status": "expected"
+        }
+      ],
+      "openings": [
+        {
+          "id": "door_p02_01",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 364,
+            "y": 284
+          },
+          "endpoints_px": [
+            {
+              "x": 334,
+              "y": 284
+            },
+            {
+              "x": 394,
+              "y": 284
+            }
+          ],
+          "width_px": 60,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1",
+            "space_bath_2"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_02",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 671,
+            "y": 326
+          },
+          "endpoints_px": [
+            {
+              "x": 608,
+              "y": 326
+            },
+            {
+              "x": 734,
+              "y": 326
+            }
+          ],
+          "width_px": 126,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_03",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 876,
+            "y": 326
+          },
+          "endpoints_px": [
+            {
+              "x": 842,
+              "y": 326
+            },
+            {
+              "x": 910,
+              "y": 326
+            }
+          ],
+          "width_px": 68,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_04",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 394,
+            "y": 536
+          },
+          "endpoints_px": [
+            {
+              "x": 394,
+              "y": 514
+            },
+            {
+              "x": 394,
+              "y": 558
+            }
+          ],
+          "width_px": 44,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_3"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_05",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 671,
+            "y": 572
+          },
+          "endpoints_px": [
+            {
+              "x": 608,
+              "y": 572
+            },
+            {
+              "x": 734,
+              "y": 572
+            }
+          ],
+          "width_px": 126,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_5"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_06",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 876,
+            "y": 518
+          },
+          "endpoints_px": [
+            {
+              "x": 842,
+              "y": 518
+            },
+            {
+              "x": 910,
+              "y": 518
+            }
+          ],
+          "width_px": 68,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_6"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_07",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 756,
+            "y": 264
+          },
+          "endpoints_px": [
+            {
+              "x": 713,
+              "y": 264
+            },
+            {
+              "x": 798,
+              "y": 264
+            }
+          ],
+          "width_px": 85,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_1"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_08",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 756,
+            "y": 580
+          },
+          "endpoints_px": [
+            {
+              "x": 713,
+              "y": 580
+            },
+            {
+              "x": 798,
+              "y": 580
+            }
+          ],
+          "width_px": 85,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_4"
+          ],
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p02_09",
+          "type": "door",
+          "status": "uncertain",
+          "center_px": {
+            "x": 460,
+            "y": 305
+          },
+          "endpoints_px": [
+            {
+              "x": 460,
+              "y": 284
+            },
+            {
+              "x": 460,
+              "y": 326
+            }
+          ],
+          "width_px": 42,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "notes": "Shared threshold/circulation detail is ambiguous."
+        },
+        {
+          "id": "win_p02_01",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 314,
+            "y": 58
+          },
+          "endpoints_px": [
+            {
+              "x": 209,
+              "y": 58
+            },
+            {
+              "x": 419,
+              "y": 58
+            }
+          ],
+          "width_px": 210,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_02",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 565,
+            "y": 58
+          },
+          "endpoints_px": [
+            {
+              "x": 486,
+              "y": 58
+            },
+            {
+              "x": 644,
+              "y": 58
+            }
+          ],
+          "width_px": 158,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_03",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 951,
+            "y": 58
+          },
+          "endpoints_px": [
+            {
+              "x": 872,
+              "y": 58
+            },
+            {
+              "x": 1029,
+              "y": 58
+            }
+          ],
+          "width_px": 157,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_04",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 314,
+            "y": 785
+          },
+          "endpoints_px": [
+            {
+              "x": 209,
+              "y": 785
+            },
+            {
+              "x": 419,
+              "y": 785
+            }
+          ],
+          "width_px": 210,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_4"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_05",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 565,
+            "y": 785
+          },
+          "endpoints_px": [
+            {
+              "x": 486,
+              "y": 785
+            },
+            {
+              "x": 644,
+              "y": 785
+            }
+          ],
+          "width_px": 158,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_5"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_06",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 951,
+            "y": 785
+          },
+          "endpoints_px": [
+            {
+              "x": 872,
+              "y": 785
+            },
+            {
+              "x": 1029,
+              "y": 785
+            }
+          ],
+          "width_px": 157,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_6"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_07",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 155,
+            "y": 241
+          },
+          "endpoints_px": [
+            {
+              "x": 155,
+              "y": 215
+            },
+            {
+              "x": 155,
+              "y": 267
+            }
+          ],
+          "width_px": 52,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_08",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 1058,
+            "y": 241
+          },
+          "endpoints_px": [
+            {
+              "x": 1058,
+              "y": 215
+            },
+            {
+              "x": 1058,
+              "y": 267
+            }
+          ],
+          "width_px": 52,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_09",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 155,
+            "y": 654
+          },
+          "endpoints_px": [
+            {
+              "x": 155,
+              "y": 628
+            },
+            {
+              "x": 155,
+              "y": 679
+            }
+          ],
+          "width_px": 51,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_4"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p02_10",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 1058,
+            "y": 654
+          },
+          "endpoints_px": [
+            {
+              "x": 1058,
+              "y": 628
+            },
+            {
+              "x": 1058,
+              "y": 679
+            }
+          ],
+          "width_px": 51,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_6"
+          ],
+          "relationship": "space_to_exterior"
+        }
+      ],
+      "spaces": [
+        {
+          "id": "space_bed_1",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              70
+            ],
+            [
+              460,
+              70
+            ],
+            [
+              460,
+              284
+            ],
+            [
+              168,
+              284
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_2",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              467,
+              70
+            ],
+            [
+              659,
+              70
+            ],
+            [
+              659,
+              326
+            ],
+            [
+              467,
+              326
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_1",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              712,
+              70
+            ],
+            [
+              799,
+              70
+            ],
+            [
+              799,
+              263
+            ],
+            [
+              712,
+              263
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_3",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              842,
+              70
+            ],
+            [
+              1045,
+              70
+            ],
+            [
+              1045,
+              326
+            ],
+            [
+              842,
+              326
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_2",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              337
+            ],
+            [
+              394,
+              337
+            ],
+            [
+              394,
+              419
+            ],
+            [
+              168,
+              419
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_3",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              428
+            ],
+            [
+              394,
+              428
+            ],
+            [
+              394,
+              514
+            ],
+            [
+              168,
+              514
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_4",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              168,
+              560
+            ],
+            [
+              460,
+              560
+            ],
+            [
+              460,
+              773
+            ],
+            [
+              168,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_5",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              467,
+              577
+            ],
+            [
+              659,
+              577
+            ],
+            [
+              659,
+              773
+            ],
+            [
+              467,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_4",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              712,
+              580
+            ],
+            [
+              799,
+              580
+            ],
+            [
+              799,
+              773
+            ],
+            [
+              712,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_6",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              842,
+              519
+            ],
+            [
+              1045,
+              519
+            ],
+            [
+              1045,
+              773
+            ],
+            [
+              842,
+              773
+            ]
+          ]
+        },
+        {
+          "id": "space_void",
+          "type": "void",
+          "status": "uncertain",
+          "polygon": [
+            [
+              467,
+              429
+            ],
+            [
+              768,
+              429
+            ],
+            [
+              768,
+              509
+            ],
+            [
+              467,
+              509
+            ]
+          ],
+          "notes": "Not an occupiable electrical room; excluded."
+        },
+        {
+          "id": "space_stair",
+          "type": "stair",
+          "status": "uncertain",
+          "polygon": [
+            [
+              842,
+              338
+            ],
+            [
+              1045,
+              338
+            ],
+            [
+              1045,
+              509
+            ],
+            [
+              842,
+              509
+            ]
+          ],
+          "notes": "Excluded from room scoring."
+        }
+      ]
+    },
+    "accepted": {
+      "doors": [],
+      "windows": []
+    },
+    "rejected": {
+      "doors": [],
+      "windows": []
+    },
+    "uncertain": {
+      "openings": [
+        {
+          "type": "space",
+          "status": "uncertain",
+          "observation": "VOID and stair areas are intentionally excluded from expected electrical-room scoring."
+        }
+      ],
+      "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
+    }
+  }
+}
+

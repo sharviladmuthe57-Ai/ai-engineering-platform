@@ -1,0 +1,756 @@
+{
+  "schema_version": "1.2",
+  "plan_id": "plan_01",
+  "fixture": {
+    "file": "plan_01.png",
+    "sha256": "46D833D7662F4A57ADCD1ED0D1DF6A5661CE17C45AA40BC341AB5F819FC48B6A",
+    "pixel_dimensions": {
+      "width": 824,
+      "height": 582
+    },
+    "integrity": "byte-identical copy of user supplied PNG"
+  },
+  "drawing_dimensions": {
+    "status": "annotated_from_visible_drawing_text",
+    "value": "50' × 40'",
+    "unit": "feet",
+    "used_as_pipeline_input": false
+  },
+  "annotations": {
+    "expected": {
+      "rooms": [
+        {
+          "id": "expected_room_1",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_2",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_3",
+          "type": "bedroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_4",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_5",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_6",
+          "type": "bathroom",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_7",
+          "type": "kitchen",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_8",
+          "type": "living",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_9",
+          "type": "store",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_10",
+          "type": "office",
+          "status": "expected"
+        },
+        {
+          "id": "expected_room_11",
+          "type": "verandah",
+          "status": "expected"
+        }
+      ],
+      "openings": [
+        {
+          "id": "door_p01_01",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 335,
+            "y": 220
+          },
+          "endpoints_px": [
+            {
+              "x": 300,
+              "y": 220
+            },
+            {
+              "x": 370,
+              "y": 220
+            }
+          ],
+          "width_px": 70,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1",
+            "space_open_living_kitchen"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_open_plan",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_02",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 406,
+            "y": 220
+          },
+          "endpoints_px": [
+            {
+              "x": 372,
+              "y": 220
+            },
+            {
+              "x": 440,
+              "y": 220
+            }
+          ],
+          "width_px": 68,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2",
+            "space_open_living_kitchen"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_open_plan",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_03",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 337,
+            "y": 151
+          },
+          "endpoints_px": [
+            {
+              "x": 304,
+              "y": 151
+            },
+            {
+              "x": 369,
+              "y": 151
+            }
+          ],
+          "width_px": 65,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_1"
+          ],
+          "hinge_side": "left",
+          "swing_direction": "into_circulation",
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p01_04",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 580,
+            "y": 151
+          },
+          "endpoints_px": [
+            {
+              "x": 545,
+              "y": 151
+            },
+            {
+              "x": 615,
+              "y": 151
+            }
+          ],
+          "width_px": 70,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bath_2"
+          ],
+          "hinge_side": "right",
+          "swing_direction": "into_circulation",
+          "relationship": "space_to_circulation"
+        },
+        {
+          "id": "door_p01_05",
+          "type": "door",
+          "status": "uncertain",
+          "center_px": {
+            "x": 541,
+            "y": 245
+          },
+          "endpoints_px": [
+            {
+              "x": 541,
+              "y": 223
+            },
+            {
+              "x": 541,
+              "y": 267
+            }
+          ],
+          "width_px": 44,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "notes": "Door swing is visible but its adjoining circulation boundary is ambiguous."
+        },
+        {
+          "id": "door_p01_06",
+          "type": "door",
+          "status": "confirmed",
+          "center_px": {
+            "x": 542,
+            "y": 470
+          },
+          "endpoints_px": [
+            {
+              "x": 542,
+              "y": 430
+            },
+            {
+              "x": 542,
+              "y": 510
+            }
+          ],
+          "width_px": 80,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen",
+            "space_covered_porch"
+          ],
+          "hinge_side": "bottom",
+          "relationship": "space_to_space"
+        },
+        {
+          "id": "door_p01_07",
+          "type": "door",
+          "status": "uncertain",
+          "center_px": {
+            "x": 680,
+            "y": 324
+          },
+          "endpoints_px": [
+            {
+              "x": 615,
+              "y": 324
+            },
+            {
+              "x": 745,
+              "y": 324
+            }
+          ],
+          "width_px": 130,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "notes": "Office/utility threshold is partly obscured by linework."
+        },
+        {
+          "id": "win_p01_01",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 214,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 157,
+              "y": 17
+            },
+            {
+              "x": 270,
+              "y": 17
+            }
+          ],
+          "width_px": 113,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_02",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 457,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 400,
+              "y": 17
+            },
+            {
+              "x": 514,
+              "y": 17
+            }
+          ],
+          "width_px": 114,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_2"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_03",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 621,
+            "y": 17
+          },
+          "endpoints_px": [
+            {
+              "x": 560,
+              "y": 17
+            },
+            {
+              "x": 682,
+              "y": 17
+            }
+          ],
+          "width_px": 122,
+          "wall": {
+            "orientation": "horizontal",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_04",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 63
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 43
+            },
+            {
+              "x": 121,
+              "y": 82
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_1"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_05",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 262
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 242
+            },
+            {
+              "x": 121,
+              "y": 281
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_06",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 121,
+            "y": 414
+          },
+          "endpoints_px": [
+            {
+              "x": 121,
+              "y": 394
+            },
+            {
+              "x": 121,
+              "y": 433
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_open_living_kitchen"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_07",
+          "type": "window",
+          "status": "confirmed",
+          "center_px": {
+            "x": 751,
+            "y": 63
+          },
+          "endpoints_px": [
+            {
+              "x": 751,
+              "y": 43
+            },
+            {
+              "x": 751,
+              "y": 82
+            }
+          ],
+          "width_px": 39,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "associated_spaces": [
+            "space_bed_3"
+          ],
+          "relationship": "space_to_exterior"
+        },
+        {
+          "id": "win_p01_08",
+          "type": "window",
+          "status": "uncertain",
+          "center_px": {
+            "x": 751,
+            "y": 208
+          },
+          "endpoints_px": [
+            {
+              "x": 751,
+              "y": 194
+            },
+            {
+              "x": 751,
+              "y": 222
+            }
+          ],
+          "width_px": 28,
+          "wall": {
+            "orientation": "vertical",
+            "location": null
+          },
+          "notes": "Short right-wall mark is visually similar to a dimension break."
+        }
+      ],
+      "spaces": [
+        {
+          "id": "space_bed_1",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              130,
+              25
+            ],
+            [
+              299,
+              25
+            ],
+            [
+              299,
+              218
+            ],
+            [
+              130,
+              218
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_1",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              304,
+              25
+            ],
+            [
+              353,
+              25
+            ],
+            [
+              353,
+              150
+            ],
+            [
+              304,
+              150
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_2",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              372,
+              25
+            ],
+            [
+              540,
+              25
+            ],
+            [
+              540,
+              219
+            ],
+            [
+              372,
+              219
+            ]
+          ]
+        },
+        {
+          "id": "space_bath_2",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              545,
+              25
+            ],
+            [
+              615,
+              25
+            ],
+            [
+              615,
+              150
+            ],
+            [
+              545,
+              150
+            ]
+          ]
+        },
+        {
+          "id": "space_bed_3",
+          "type": "bedroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              619,
+              25
+            ],
+            [
+              745,
+              25
+            ],
+            [
+              745,
+              267
+            ],
+            [
+              619,
+              267
+            ]
+          ]
+        },
+        {
+          "id": "space_open_living_kitchen",
+          "type": "open_plan",
+          "status": "confirmed",
+          "polygon": [
+            [
+              130,
+              225
+            ],
+            [
+              540,
+              225
+            ],
+            [
+              540,
+              510
+            ],
+            [
+              130,
+              510
+            ]
+          ],
+          "semantic_zones": [
+            "kitchen",
+            "living"
+          ],
+          "notes": "No wall separates the labelled kitchen and living areas."
+        },
+        {
+          "id": "space_utility",
+          "type": "utility",
+          "status": "uncertain",
+          "polygon": [
+            [
+              544,
+              298
+            ],
+            [
+              745,
+              298
+            ],
+            [
+              745,
+              323
+            ],
+            [
+              544,
+              323
+            ]
+          ],
+          "notes": "Narrow labelled utility/circulation strip; excluded from geometric scoring."
+        },
+        {
+          "id": "space_bath_3",
+          "type": "bathroom",
+          "status": "confirmed",
+          "polygon": [
+            [
+              544,
+              369
+            ],
+            [
+              613,
+              369
+            ],
+            [
+              613,
+              421
+            ],
+            [
+              544,
+              421
+            ]
+          ]
+        },
+        {
+          "id": "space_office",
+          "type": "office",
+          "status": "confirmed",
+          "polygon": [
+            [
+              616,
+              369
+            ],
+            [
+              745,
+              369
+            ],
+            [
+              745,
+              421
+            ],
+            [
+              616,
+              421
+            ]
+          ]
+        },
+        {
+          "id": "space_covered_porch",
+          "type": "verandah",
+          "status": "confirmed",
+          "polygon": [
+            [
+              551,
+              429
+            ],
+            [
+              745,
+              429
+            ],
+            [
+              745,
+              510
+            ],
+            [
+              551,
+              510
+            ]
+          ]
+        }
+      ]
+    },
+    "accepted": {
+      "doors": [],
+      "windows": []
+    },
+    "rejected": {
+      "doors": [],
+      "windows": []
+    },
+    "uncertain": {
+      "openings": [],
+      "reason": "No opening pixel locations were entered without a dedicated annotation pass; uncertain observations are excluded from precision/recall."
+    }
+  }
+}
+

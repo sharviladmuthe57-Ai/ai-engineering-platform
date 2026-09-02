@@ -279,3 +279,4 @@ def build_bom(placed, total_wire, cctv_comps, total_cat6):
 
     return [{"item": k, "qty": v, "unit": unit_of(k)}
             for k, v in counts.items()]
+

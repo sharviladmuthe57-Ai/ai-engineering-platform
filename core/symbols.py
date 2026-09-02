@@ -287,3 +287,4 @@ def draw_symbol(ax, symbol_id: str, x: float, y: float,
     color = SYMBOL_COLORS.get(symbol_id, "#BDC3C7")
     fn(ax, x, y, sz=sz, color=color, zorder=zorder)
     return color
+
