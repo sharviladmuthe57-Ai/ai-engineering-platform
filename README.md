@@ -10,7 +10,7 @@ Image upload
 → additive door/window candidates
 → engineer verification
 → accepted candidates adapted to legacy room openings
-→ deterministic electrical placement and L-path routing
+→ deterministic electrical placement and architecture-aware routing
 → PNG electrical layout and BOM
 ```
 
@@ -27,7 +27,8 @@ them in the verification screen.
 - `core/openings.py` — wall-mask boundary-gap candidate extraction and the
   verified-candidate-to-legacy adapter.
 - `core/rules_engine.py` — deterministic per-room component rules.
-- `core/geometry.py` — component placement, Manhattan routing, BOM.
+- `core/geometry.py` and `core/routing.py` — component placement,
+  architecture-aware room-graph routing, and BOM.
 - `core/renderer.py` and `core/symbols.py` — Matplotlib PNG rendering.
 - `core/ocr_reader.py` — standalone multi-variant Tesseract helper; it is
   not currently wired into the upload route.
@@ -70,5 +71,6 @@ editable CAD geometry, and 3D visualization are not implemented yet.
 
 Run `python -m unittest discover -s tests -v`.
 
-`fixtures/benchmarks/` is reserved for versioned, consented benchmark plans
-and expected annotations. No real plans are committed yet.
+`fixtures/benchmarks/` contains three versioned, consented real-plan PNG
+fixtures with expected annotations and detected benchmark evidence. They are
+stable benchmark inputs and must not be casually replaced.

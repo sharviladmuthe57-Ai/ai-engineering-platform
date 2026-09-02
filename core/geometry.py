@@ -8,6 +8,7 @@ BOM derived entirely from placed components (no estimates).
 
 import math
 from .rules_engine import get_rules, compute_position, COMPONENTS
+from .routing import legacy_manhattan_route, path_length as routing_path_length, route_component
 
 BUFFER = 1.15   # 15% wire slack
 
@@ -36,7 +37,7 @@ ROOM_FILL = {
 # ═════════════════════════════════════════════════════════════════════════════
 #  MAIN ENTRY POINT
 # ═════════════════════════════════════════════════════════════════════════════
-def generate_layout(vision_data: dict, project_type: str = "electrical") -> dict:
+def generate_layout(vision_data: dict, project_type: str = "electrical", routing_version: str = "v2") -> dict:
     rooms    = vision_data.get("rooms",    [])
     elements = vision_data.get("detected_elements", [])
 
@@ -71,14 +72,26 @@ def generate_layout(vision_data: dict, project_type: str = "electrical") -> dict
                         "qty"      : 1,
                     })
 
-                    # Wire route: DB → component (wall-hugging)
-                    route = wall_route(db_pos, p)
+                    # V2 stays inside the detected room domain when a connected
+                    # architectural path exists. V1 remains available for audit.
+                    if routing_version == "v1":
+                        routing = {
+                            "waypoints": wall_route(db_pos, p), "routing_version": "v1",
+                            "architecture_aware": False, "fallback_used": False,
+                            "fallback_reason": None, "source_room": None,
+                            "target_room": room["id"], "traversed_rooms": [],
+                            "controlled_transitions": [],
+                        }
+                    else:
+                        routing = route_component(db_pos, p, room["id"], rooms)
+                    route = routing["waypoints"]
                     routes.append({
                         "from"      : "db",
                         "to"        : f"{room['id']}_{comp_id}",
                         "waypoints" : route,
                         "length_m"  : round(path_length(route) * BUFFER, 2),
                         "symbol"    : spec.get("symbol","outlet"),
+                        **{key: value for key, value in routing.items() if key != "waypoints"},
                     })
 
     # Add DB itself to placed components
@@ -141,6 +154,7 @@ def generate_layout(vision_data: dict, project_type: str = "electrical") -> dict
     return {
         "unit"              : vision_data.get("unit","metres"),
         "project_type"      : project_type,
+        "routing_version"   : routing_version,
         "rooms"             : rooms,
         "db_pos"            : db_pos,
         "placed_components" : placed,
@@ -164,25 +178,11 @@ def wall_route(start: tuple, end: tuple) -> list:
     Chooses the shorter of two L-options.
     Real wall-graph routing (Dijkstra) will come in V1.2.
     """
-    sx, sy = start
-    ex, ey = end
-    # Option A: horizontal then vertical
-    optA = [start, (ex, sy), end]
-    # Option B: vertical then horizontal
-    optB = [start, (sx, ey), end]
-
-    if path_length(optA) <= path_length(optB):
-        return optA
-    return optB
+    return legacy_manhattan_route(start, end)
 
 
 def path_length(wpts: list) -> float:
-    total = 0.0
-    for i in range(len(wpts)-1):
-        ax,ay = wpts[i]
-        bx,by = wpts[i+1]
-        total += abs(bx-ax) + abs(by-ay)
-    return round(total, 2)
+    return routing_path_length(wpts)
 
 
 # ═════════════════════════════════════════════════════════════════════════════

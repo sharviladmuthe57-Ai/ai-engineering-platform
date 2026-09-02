@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 import math
+import statistics
 
 import cv2
 import numpy as np
@@ -141,6 +142,24 @@ def _sample_segment(a: tuple[float, float], b: tuple[float, float], step: float 
             for index in range(count + 1)]
 
 
+def _on_controlled_transition(point: tuple[float, float], transitions: list[dict[str, Any]], tolerance: float = .025) -> bool:
+    """Whether a sampled point lies on an explicitly declared V2 room bridge."""
+    px, py = point
+    for transition in transitions:
+        ax, ay = transition["from_point"]
+        bx, by = transition["to_point"]
+        dx, dy = bx - ax, by - ay
+        length_sq = dx * dx + dy * dy
+        if length_sq == 0:
+            if math.dist(point, (ax, ay)) <= tolerance:
+                return True
+            continue
+        ratio = max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / length_sq))
+        if math.dist(point, (ax + ratio * dx, ay + ratio * dy)) <= tolerance:
+            return True
+    return False
+
+
 def _route_records(layout: dict[str, Any], wall_mask: np.ndarray, scale_x: float, scale_y: float) -> list[dict[str, Any]]:
     rooms = layout["rooms"]
     components = {tuple(component["pos"]): component for component in layout["placed_components"] if _finite(component.get("pos"))}
@@ -149,7 +168,10 @@ def _route_records(layout: dict[str, Any], wall_mask: np.ndarray, scale_x: float
         points = [tuple(point) for point in route["waypoints"]]
         sampled = [point for a, b in zip(points, points[1:]) for point in _sample_segment(a, b)]
         crossed = sorted({room["id"] for point in sampled for room in rooms if _inside(point, room)})
-        outside = any(not any(_inside(point, room) for room in rooms) for point in sampled)
+        transitions = route.get("controlled_transitions", [])
+        outside_room_union = any(not any(_inside(point, room) for room in rooms) for point in sampled)
+        outside = any(not any(_inside(point, room) for room in rooms) and not _on_controlled_transition(point, transitions)
+                      for point in sampled)
         wall_hits = sum(bool(_pixel_wall_collision(point, wall_mask, scale_x, scale_y)) for point in sampled)
         end_component = components.get(points[-1])
         raw = path_length(points)
@@ -160,10 +182,46 @@ def _route_records(layout: dict[str, Any], wall_mask: np.ndarray, scale_x: float
             "raw_length_m": raw, "reported_length_m": route.get("length_m"),
             "slack_factor": round(route.get("length_m", 0) / raw, 3) if raw else None,
             "spaces_crossed": crossed, "outside_building": outside,
+            "outside_room_union": outside_room_union,
             "wall_mask_samples": wall_hits, "sample_count": len(sampled),
-            "suspicious": outside or len(crossed) > 2,
+            "routing_version": route.get("routing_version", "v1"),
+            "architecture_aware": bool(route.get("architecture_aware", False)),
+            "fallback_used": bool(route.get("fallback_used", False)),
+            "fallback_reason": route.get("fallback_reason"),
+            "source_room": route.get("source_room"), "target_room": route.get("target_room"),
+            "traversed_rooms": route.get("traversed_rooms", []),
+            "controlled_transition_count": len(transitions),
+            "controlled_transitions": transitions,
+            "suspicious": (outside or bool(route.get("fallback_used", False)) or
+                           (route.get("routing_version", "v1") == "v1" and len(crossed) > 2)),
         })
     return records
+
+
+def route_summary(routes: list[dict[str, Any]]) -> dict[str, Any]:
+    """Stable, additive V1/V2 comparison summary for the electrical benchmark."""
+    raw = [route["raw_length_m"] for route in routes]
+    reported = [route["reported_length_m"] for route in routes]
+    return {
+        "route_count": len(routes),
+        "total_raw_route_length_m": round(sum(raw), 2),
+        "total_reported_wire_length_m": round(sum(reported), 2),
+        "mean_route_length_m": round(statistics.mean(raw), 2) if raw else 0.0,
+        "median_route_length_m": round(statistics.median(raw), 2) if raw else 0.0,
+        "max_route_length_m": round(max(raw), 2) if raw else 0.0,
+        "outside_building_routes": sum(route["outside_building"] for route in routes),
+        "outside_room_union_routes": sum(route["outside_room_union"] for route in routes),
+        "suspicious_routes": sum(route["suspicious"] for route in routes),
+        "fallback_routes": sum(route["fallback_used"] for route in routes),
+        "architecture_aware_routes": sum(route["architecture_aware"] and not route["fallback_used"] for route in routes),
+        "architecture_aware_success_percent": round(100 * sum(route["architecture_aware"] and not route["fallback_used"] for route in routes) / len(routes), 1) if routes else 0.0,
+        "wall_mask_samples": sum(route["wall_mask_samples"] for route in routes),
+        "controlled_transition_count": sum(route["controlled_transition_count"] for route in routes),
+        "worst_routes": [
+            {key: route[key] for key in ("route_id", "destination_component_id", "raw_length_m", "reported_length_m", "outside_building", "suspicious", "fallback_used")}
+            for route in sorted(routes, key=lambda route: route["raw_length_m"], reverse=True)[:5]
+        ],
+    }
 
 
 def _room_expectations(layout: dict[str, Any], components: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -223,7 +281,7 @@ def _counts(records: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(values.items()))
 
 
-def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3") -> dict[str, Any]:
+def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3", routing_version: str = "v2") -> dict[str, Any]:
     """Run frozen architecture → frozen electrical engine and audit its output."""
     if validate_expectations():
         raise ValueError("Electrical expectation schema is invalid")
@@ -235,7 +293,7 @@ def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3")
     # openings can alter legacy room doors/windows. Frozen benchmark outputs
     # currently contain pending V3 candidates, so electrical inputs stay stable.
     vision["rooms"] = apply_verified_openings_to_rooms(vision.get("rooms", []), vision.get("opening_candidates", []))
-    layout = generate_layout(vision, "electrical")
+    layout = generate_layout(vision, "electrical", routing_version=routing_version)
     image = cv2.imread(str(image_path))
     if image is None:
         raise ValueError(f"Cannot load {image_path}")
@@ -249,10 +307,12 @@ def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3")
     rooms = [{"room_id": room["id"], "label": room.get("name"), "dimensions_m": {"width": room["width"], "height": room["height"]}, "area_m2": room.get("area_m2"), "legacy_door_count": len(room.get("doors", [])), "legacy_window_count": len(room.get("windows", []))} for room in layout["rooms"]]
     return {
         "plan_id": Path(image_path).stem, "success": True, "opening_detector": opening_detector,
+        "routing_version": routing_version,
         "architectural_input": {"room_count": len(rooms), "opening_candidates_pending": sum(item.get("verification_status") == "pending" for item in vision.get("opening_candidates", [])), "accepted_opening_candidates": sum(item.get("verification_status") == "accepted" for item in vision.get("opening_candidates", [])), "legacy_room_doors_used_by_engine": sum(len(room.get("doors", [])) for room in layout["rooms"])},
         "rooms": rooms, "db_location_m": {"x": layout["db_pos"][0], "y": layout["db_pos"][1]},
         "components": components, "component_counts": _counts(components), "total_component_count": len(components),
         "routes": routes, "total_route_count": len(routes), "total_raw_route_length_m": round(sum(route["raw_length_m"] for route in routes), 2), "total_reported_wire_length_m": layout["total_wire_m"], "configured_slack_factor": BUFFER,
+        "routing_summary": route_summary(routes),
         "placement_quality": {**_quality(components, routes, collisions), "duplicate_component_ids": duplicate_ids}, "component_collisions": collisions,
         "room_expectations": _room_expectations(layout, components), "boq_audit": _bom_audit(layout), "bom": layout["bom"],
         "failure_classification": _failure_classification(components, routes, collisions, layout),
@@ -311,7 +371,7 @@ def render_electrical_overlay(report: dict[str, Any], output_path: str | Path) -
         cv2.drawMarker(canvas, (width + 22, y), color, cv2.MARKER_CROSS, 10, 2, cv2.LINE_AA)
         cv2.putText(canvas, label, (width + 38, y + 4), cv2.FONT_HERSHEY_SIMPLEX, .43, (235, 235, 235), 1, cv2.LINE_AA)
     quality = report["placement_quality"]
-    lines = [f"Components: {report['total_component_count']}", f"Routes: {report['total_route_count']}", f"Wire: {report['total_reported_wire_length_m']} m", f"Wall collisions: {quality['wall_mask_collisions']}", f"Co-locations: {quality['component_collisions']}"]
+    lines = [f"Routing: {report.get('routing_version', 'v1').upper()}", f"Components: {report['total_component_count']}", f"Routes: {report['total_route_count']}", f"Wire: {report['total_reported_wire_length_m']} m", f"Wall collisions: {quality['wall_mask_collisions']}", f"Co-locations: {quality['component_collisions']}"]
     for index, line in enumerate(lines):
         cv2.putText(canvas, line, (width + 12, 310 + index * 22), cv2.FONT_HERSHEY_SIMPLEX, .43, (220, 220, 220), 1, cv2.LINE_AA)
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
