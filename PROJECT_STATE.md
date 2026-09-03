@@ -317,3 +317,15 @@ Existing upload, verification, generation, status, PNG, and BOM endpoints remain
 **Freeze decision.** Editable 2D Electrical Canvas V1 is sufficient to freeze: the generate → review → edit → route/BOQ update → save/reopen loop is working with a low-spec-friendly implementation. Do not reopen frozen CV, placement, or routing work for ordinary editor changes.
 
 **One next milestone.** Build an interactive 3D electrical/building view from the same stable structured project state and component IDs. Do not start it without approval.
+
+## 23. Permanent zero-cost implementation policy
+
+**Verified policy on 2026-09-03.** The Phase-1 demo must run locally without paid APIs, paid cloud infrastructure, metered services, API keys, or a payment method. The authorized budget is ₹0 / $0 unless the owner explicitly approves a named service, its purpose, billing model, and a cost limit in advance.
+
+- Prefer existing code, deterministic local algorithms, open-source libraries, browser-native functionality, and local JSON/file persistence (or a local lightweight database only when needed).
+- Do not add or enable paid/usage-metered AI, OCR, vision, mapping, database, authentication, storage, email, analytics, hosting, compute, CI/CD, or deployment services. Do not provision cloud resources, trials, credits, subscriptions, domains, billing, or automatic upgrades.
+- Never require an API key for core functionality or commit secrets, tokens, credentials, or billing information.
+- Before adding an external service, verify that it is genuinely free for the intended operation and cannot create an unexpected charge. If cost behaviour is uncertain, do not use it.
+- If a future feature would benefit from paid infrastructure, preserve a local/free core path where practical and label the alternative **FUTURE / OPTIONAL / REQUIRES COST APPROVAL**. Do not activate it without explicit approval.
+
+The current application complies: FastAPI, OpenCV, NumPy, local geometry/rules, SVG/DOM UI, and local JSON job persistence provide the complete current demo without external paid services.
