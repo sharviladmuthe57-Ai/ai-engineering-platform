@@ -1,6 +1,6 @@
 # AI Engineering Platform — Project State
 
-Last verified: 2026-09-03. Canonical baseline: `e2bc65d001dc79f248f44cd4d9ebd5346809cfa0` (`Validate routing portals with V2.1`); the Placement V2 checkpoint described below is pending commit.
+Last verified: 2026-09-03. Current Phase-1 backend state includes the completed Placement V2 checkpoint described below.
 
 This is a durable handoff for developers and coding agents. The repository, tests, and versioned fixtures are the source of truth. Statements labelled **Verified** were checked in this repository on the date above. Statements labelled **Product intent** describe direction, not shipped functionality.
 
