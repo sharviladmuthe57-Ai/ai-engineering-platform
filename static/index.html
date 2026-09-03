@@ -68,6 +68,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .conf-fill{height:100%;border-radius:3px;transition:width .5s}
 .section-title{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px}
 </style>
+<link rel="stylesheet" href="/static/editor.css">
 </head>
 <body>
 <nav>
@@ -166,11 +167,48 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="downloadLayout()">
           ⬇️ Download Layout PNG
         </button>
+        <button class="btn btn-success btn-full" style="margin-top:10px" onclick="openEditor(jobId)">
+          ✏️ Open Interactive 2D Editor
+        </button>
       </div>
       <div class="card">
         <h2>📋 Bill of Materials</h2>
         <div id="bom-table"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- EDITABLE 2D CANVAS -->
+  <div id="editor-section" style="display:none;margin-top:24px">
+    <hr class="divider">
+    <div class="editor-shell">
+      <div class="editor-topbar">
+        <span id="editor-title" class="editor-title">⚡ Editable Electrical Canvas</span>
+        <span id="editor-status" class="editor-status">Load a generated project to edit it.</span>
+        <button id="editor-fit" class="btn btn-primary">Fit view</button>
+        <button id="editor-save" class="btn btn-success">Save</button>
+        <button id="editor-reset" class="btn" style="background:#30363d;color:#fff">Reset</button>
+      </div>
+      <aside class="editor-sidebar">
+        <h3>Component library</h3>
+        <p>Choose a tool, then click inside a detected room to add one manual component.</p>
+        <div class="editor-palette" style="margin-top:12px">
+          <button class="editor-tool" data-component-type="ceiling_light">✦ Add light</button>
+          <button class="editor-tool" data-component-type="ceiling_fan">✚ Add fan</button>
+          <button class="editor-tool" data-component-type="switch_1way">⌁ Add switch</button>
+          <button class="editor-tool" data-component-type="outlet_2pin">● Add socket</button>
+        </div>
+        <label class="editor-toggle"><input type="checkbox" id="editor-room-toggle"> Show room boundaries</label>
+        <p style="margin-top:16px">Drag a component within its assigned room. Pan empty space; use the mouse wheel to zoom.</p>
+      </aside>
+      <main class="editor-canvas-wrap">
+        <svg id="editor-canvas" class="editor-canvas" aria-label="Editable electrical engineering canvas"></svg>
+        <div class="editor-hint">Project coordinates stay in metres · view transforms do not alter design data</div>
+      </main>
+      <aside class="editor-sidebar right">
+        <div><h3>Selected component</h3><div id="editor-properties" class="editor-properties"></div></div>
+        <div id="editor-boq" class="editor-boq"></div>
+      </aside>
     </div>
   </div>
 </div>
@@ -209,6 +247,8 @@ async function uploadPlan(){
   const h = document.getElementById("known-height").value;
   if(w) fd.append("known_width", w);
   if(h) fd.append("known_height", h);
+  const projectName = document.getElementById("project-name").value.trim();
+  if(projectName) fd.append("project_name", projectName);
 
   try {
     const res  = await fetch("/upload", {method:"POST", body:fd});
@@ -432,5 +472,6 @@ function setStatus(id, type, msg){
   el.innerHTML = (type==="info"?'<div class="spinner"></div>':"") + `<span>${msg}</span>`;
 }
 </script>
+<script src="/static/editor.js"></script>
 </body>
 </html>

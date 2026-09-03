@@ -12,7 +12,7 @@ The present system is a Phase-1 prototype, not construction-ready electrical des
 
 ## 2. Current phase
 
-**Product intent.** Phase 1 is a strong demonstration of architectural-plan understanding, deterministic electrical generation, PNG output, and BOM generation. Editable CAD-like 2D, interactive 3D, plumbing, HVAC, structural design, multi-floor coordination, and broader BIM functions are future work.
+**Verified.** Phase 1 now includes the working Editable 2D Electrical Canvas V1: generated electrical design can be reviewed, manually edited, routed incrementally, saved, and reopened. Interactive 3D, plumbing, HVAC, structural design, multi-floor coordination, and broader BIM functions remain future work.
 
 ## 3. Current architecture
 
@@ -274,3 +274,46 @@ The local Git identity is `Srushti Admuthe <srushtiadmuthe1001@gmail.com>`, not 
 - 2026-09-01: `5f17abb` clarified the electrical benchmark overlay legend.
 - Recent main history: V3 symbol-aware opening classification and tests; V1–V3 comparison; electrical expectations, read-only audit, reproducible runner, invariant tests, and documentation.
 - Recovery safety snapshot: `2ee4729` on `recovered-sunday-tuesday`; preserve only, do not merge.
+
+## 22. Editable 2D Electrical Canvas V1
+
+**Verified on 2026-09-03.** The editor is a deliberately lightweight product layer over the existing canonical generated layout. It uses plain HTML/CSS/JavaScript and SVG, with no frontend framework, WebGL, worker stack, database, or new runtime dependency. The background is the job's original uploaded plan; component and route coordinates remain in metres with a bottom-left, y-up project coordinate system. SVG converts to raster coordinates only for drawing, including the required y-axis inversion.
+
+### State and persistence
+
+- `core/editor_state.py` creates a JSON-serialisable `project_state_version: "1.0"` from the immutable generated `layout` retained in each completed job.
+- State contains job/plan reference, scale and coordinate metadata, rooms, DB position, stable components, routes, BOQ, wire total, CCTV state where applicable, edit/revision metadata, monotonic `next_component_sequence`, and `last_modified`.
+- Jobs continue to persist as small local JSON files under `jobs/`. Existing completed jobs are lazily initialised so no migration command or database is required.
+- `POST /project/{jid}/save` records save metadata; opening the editor stores `?editor_job=<jid>` in the URL, so refresh/reopen reloads the same saved state. `POST /project/{jid}/reset` derives a clean editable state from the preserved generated layout.
+
+### Supported operations and safeguards
+
+- Select any existing component to inspect its stable ID, type, room, position, provenance, and placement method.
+- Drag a non-DB component. Clicks do not mutate state; a small drag threshold prevents a selection click being misclassified as a manual move. A valid move preserves the ID, stores `position_source: "user_modified"`, and updates only that component's Routing V2.1 route.
+- For V1, cross-room movement is intentionally rejected. A component must remain inside its assigned detected room; this safer rule prevents a stale room association while keeping routing/BOQ assumptions stable.
+- Add a light, fan, one-way switch, or two-pin socket by choosing the SVG/DOM palette tool and clicking inside a detected room. New IDs are persisted deterministically, for example `user_ceiling_light_0001`, and carry `position_source`/`editor_status`/placement provenance of `user_added`.
+- Delete a selected non-DB component after confirmation. Its route is removed. Reset also asks for confirmation.
+- The BOM continues to use the existing formula implementation. Every accepted move/add/delete refreshes BOQ and total wire length without rerunning CV or global placement.
+
+### Additive API surface
+
+- `GET /plan/{jid}` serves only that job's original architectural raster.
+- `GET /project/{jid}` returns the editable structured state.
+- `PATCH /project/{jid}/components/{component_id}` validates and moves one component.
+- `POST /project/{jid}/components` adds a supported manual component.
+- `DELETE /project/{jid}/components/{component_id}` removes one non-DB component.
+- `POST /project/{jid}/save` and `POST /project/{jid}/reset` persist metadata or restore generated state.
+
+Existing upload, verification, generation, status, PNG, and BOM endpoints remain available. `/bom/{jid}` now reports the active editable-state BOQ once a project state exists.
+
+### Verification and limitations
+
+- Added `tests/test_editor_state.py` for stable-ID moves, targeted route updates, BOQ changes, deterministic add/delete IDs, invalid state rejection, JSON persistence, and reset recovery.
+- Added `tests/test_editor_api.py` for safe invalid IDs, all editor API operations, save/reload, and reset. The full tracked test suite passed: **49 tests, 0 failures**.
+- Manual local-browser evidence used `fixtures/benchmarks/plan_01.png`: upload/generate (10 rooms, 71 components), open editor, select, move a light, confirm route/wire change (595.39 m → 595.67 m in that generated job), add a light (12 lights; 602.10 m), delete it (11 lights; 595.67 m), save, refresh/reopen, and confirm the moved light remains `room_1_ceiling_light_0` at 5.63, 2.82 m with `user_modified` provenance. The workspace visually presents an aligned plan, routes, component glyphs, dark technical sidebars, and live BOQ.
+- Browser screenshots were inspected during that local run but are deliberately not committed as runtime/build artefacts.
+- Known V1 limits: rectangular detected-room validation only; no cross-room reassignment, undo/redo, circuit/load editing, code validation, CAD drafting, or mobile optimisation. These are deliberately outside the milestone.
+
+**Freeze decision.** Editable 2D Electrical Canvas V1 is sufficient to freeze: the generate → review → edit → route/BOQ update → save/reopen loop is working with a low-spec-friendly implementation. Do not reopen frozen CV, placement, or routing work for ordinary editor changes.
+
+**One next milestone.** Build an interactive 3D electrical/building view from the same stable structured project state and component IDs. Do not start it without approval.

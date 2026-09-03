@@ -21,6 +21,10 @@ from core.cv_analyzer import analyze_floor_plan   # ← local CV, no API
 from core.geometry    import generate_layout
 from core.renderer    import render_layout
 from core.openings    import apply_verified_openings_to_rooms
+from core.editor_state import (
+    EditorStateError, add_component, create_project_state, delete_component,
+    move_component, reset_project_state,
+)
 
 # ── APP ──────────────────────────────────────────────────────
 app = FastAPI(title="Project V1", version="1.0.0")
@@ -47,6 +51,29 @@ def load_job(jid):
     return json.loads(p.read_text())
 
 
+def project_state_for(jid, job):
+    """Lazily add editor state for completed jobs created before Editor V1."""
+    if job.get("status") != "completed" or "layout" not in job:
+        raise HTTPException(400, "Project layout is not ready yet")
+    if "project_state" not in job:
+        scale = job.get("vision_data", {}).get("_debug", {}).get("scale_mppx")
+        job["project_state"] = create_project_state(jid, job["layout"], scale, job.get("project_name"))
+        save_job(jid, job)
+    return job["project_state"]
+
+
+def editor_response(jid, state):
+    """Expose structured state without leaking local filesystem paths."""
+    return {"job_id": jid, "architecture_image_url": f"/plan/{jid}", **state}
+
+
+def request_position(payload):
+    value = payload.get("position")
+    if isinstance(value, dict):
+        value = [value.get("x"), value.get("y")]
+    return value
+
+
 # ── ROUTES ───────────────────────────────────────────────────
 @app.get("/")
 def root():
@@ -62,6 +89,7 @@ def health():
 async def upload(
     file:         UploadFile = File(...),
     project_type: str        = Form("electrical"),
+    project_name: str        = Form(""),
     known_width:  str        = Form(""),
     known_height: str        = Form(""),
 ):
@@ -99,6 +127,7 @@ async def upload(
     save_job(jid, {
         "status"       : "awaiting_verification",
         "project_type" : project_type,
+        "project_name" : project_name.strip(),
         "img_path"     : str(img_path),
         "vision_data"  : vision_data,
         "created_at"   : datetime.now().isoformat(),
@@ -147,12 +176,16 @@ async def verify(jid: str, verified_data: dict):
         "output_img"  : str(out_png),
         "completed_at": datetime.now().isoformat(),
     })
+    job["project_state"] = create_project_state(
+        jid, layout, vision_data.get("_debug", {}).get("scale_mppx"), job.get("project_name")
+    )
     save_job(jid, job)
 
     return JSONResponse({
         "job_id"     : jid,
         "status"     : "completed",
         "layout_url" : f"/outputs/{jid}_layout.png",
+        "editor_url" : f"/?editor_job={jid}",
         "bom"        : layout["bom"],
         "summary"    : {
             "rooms"        : len(layout["rooms"]),
@@ -183,15 +216,88 @@ def get_layout(jid: str):
     return FileResponse(job["output_img"], media_type="image/png")
 
 
+@app.get("/plan/{jid}")
+def get_plan(jid: str):
+    """Serve the architectural raster only for the requested job."""
+    job = load_job(jid)
+    image_path = Path(job.get("img_path", ""))
+    if not image_path.exists() or not image_path.is_file():
+        raise HTTPException(404, "Architectural plan image is unavailable")
+    return FileResponse(str(image_path))
+
+
 @app.get("/bom/{jid}")
 def get_bom(jid: str):
     job = load_job(jid)
     if job["status"] != "completed":
         raise HTTPException(400, "Not completed yet")
-    return JSONResponse({"job_id": jid, "bom": job["layout"]["bom"]})
+    state = project_state_for(jid, job)
+    return JSONResponse({"job_id": jid, "bom": state["bom"], "total_wire_m": state["total_wire_m"]})
 
 
 @app.get("/status/{jid}")
 def get_status(jid: str):
     job = load_job(jid)
     return {"job_id": jid, "status": job["status"], "created_at": job["created_at"]}
+
+
+# ── EDITABLE 2D PROJECT API ────────────────────────────────────────────────
+@app.get("/project/{jid}")
+def get_project(jid: str):
+    job = load_job(jid)
+    return JSONResponse(editor_response(jid, project_state_for(jid, job)))
+
+
+@app.patch("/project/{jid}/components/{component_id}")
+def patch_project_component(jid: str, component_id: str, payload: dict):
+    job = load_job(jid)
+    state = project_state_for(jid, job)
+    try:
+        move_component(state, component_id, request_position(payload))
+    except EditorStateError as error:
+        raise HTTPException(400, str(error)) from error
+    save_job(jid, job)
+    return JSONResponse(editor_response(jid, state))
+
+
+@app.post("/project/{jid}/components")
+def post_project_component(jid: str, payload: dict):
+    job = load_job(jid)
+    state = project_state_for(jid, job)
+    try:
+        add_component(state, payload.get("component_type", ""), payload.get("room_id", ""), request_position(payload))
+    except EditorStateError as error:
+        raise HTTPException(400, str(error)) from error
+    save_job(jid, job)
+    return JSONResponse(editor_response(jid, state), status_code=201)
+
+
+@app.delete("/project/{jid}/components/{component_id}")
+def delete_project_component(jid: str, component_id: str):
+    job = load_job(jid)
+    state = project_state_for(jid, job)
+    try:
+        delete_component(state, component_id)
+    except EditorStateError as error:
+        raise HTTPException(400, str(error)) from error
+    save_job(jid, job)
+    return JSONResponse(editor_response(jid, state))
+
+
+@app.post("/project/{jid}/save")
+def save_project(jid: str):
+    job = load_job(jid)
+    state = project_state_for(jid, job)
+    state["last_saved"] = datetime.now().isoformat()
+    save_job(jid, job)
+    return JSONResponse(editor_response(jid, state))
+
+
+@app.post("/project/{jid}/reset")
+def reset_project(jid: str):
+    job = load_job(jid)
+    prior = project_state_for(jid, job)
+    scale = job.get("vision_data", {}).get("_debug", {}).get("scale_mppx")
+    job["project_state"] = reset_project_state(jid, job["layout"], scale, prior.get("revision_number", 0), job.get("project_name"))
+    save_job(jid, job)
+    return JSONResponse(editor_response(jid, job["project_state"]))
