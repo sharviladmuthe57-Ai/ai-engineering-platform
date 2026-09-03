@@ -1,6 +1,6 @@
 # AI Engineering Platform — Project State
 
-Last verified: 2026-09-03 on `main` at `8e5e060ea66da5ddbc13ad3c00ad6e19263e3b6f` before the pending Routing V2.1 checkpoint.
+Last verified: 2026-09-03. Canonical baseline: `e2bc65d001dc79f248f44cd4d9ebd5346809cfa0` (`Validate routing portals with V2.1`); the Placement V2 checkpoint described below is pending commit.
 
 This is a durable handoff for developers and coding agents. The repository, tests, and versioned fixtures are the source of truth. Statements labelled **Verified** were checked in this repository on the date above. Statements labelled **Product intent** describe direction, not shipped functionality.
 
@@ -24,6 +24,7 @@ The present system is a Phase-1 prototype, not construction-ready electrical des
 - `core/openings_v2.py` implements exterior-wall-aware proposals, clustering, conservative V2 classification, and opt-in V3 symbol-aware classification.
 - `core/opening_symbols.py` scores local door-swing/leaf and window-band evidence for V3.
 - `core/rules_engine.py` contains deterministic room-type component rules and positional hints.
+- `core/placement.py` validates proposed electrical positions against their intended room rectangle and already placed components.
 - `core/geometry.py` places components, chooses a DB, delegates routing, and derives the BOM.
 - `core/routing.py` implements deterministic Routing V2.1: a room-rectangle connectivity graph, validated door/opening portals where available, conservative geometric transitions otherwise, per-component room-aware paths, and declared V1 fallback metadata.
 - `core/renderer.py` and `core/symbols.py` render the electrical PNG. `static/index.html` is the upload and verification UI.
@@ -49,6 +50,7 @@ Engineer verification in static/index.html
   → only accepted candidates adapted to legacy rooms[].doors/windows
   → generate_layout()
   → deterministic component rules and placement
+  → Placement V2 room-local validation (inset, collision resolution, stable IDs)
   → Routing V2.1 room-connectivity path (or explicit V1 fallback)
   → BOM + renderer PNG + completed job response
 ```
@@ -107,7 +109,7 @@ V3 emitted 52 uncertain pending proposals (17, 18, and 17 by plan). None was acc
 
 ## 9. Electrical engine status
 
-**Verified.** `rules_engine.py` maps room labels to static components and positional hints. `geometry.py` generates each component, selects a DB by choosing the room closest to the origin and placing the DB near that room's left wall, and delegates to Routing V2.1 by default. It applies `BUFFER = 1.15` to route length.
+**Verified.** `rules_engine.py` maps room labels to static components and positional hints. `geometry.py` generates each component, applies Placement V2 validation, selects a DB by choosing the room closest to the origin and placing the DB near that room's left wall, and delegates to Routing V2.1 by default. It applies `BUFFER = 1.15` to route length.
 
 The engine supports lights, fans, one-/two-way switches, sockets, AC and appliance points, DB, and optional CCTV/NVR output depending on project type. It is a deterministic first-draft generator, not code-compliant circuit/load engineering.
 
@@ -132,6 +134,31 @@ Placement audit results:
 | 03 | 92.2 | 58.0 | 14/14 | 3 | 0 | 7 | 5 |
 
 Switch-near-door measurements describe legacy room doors only. All benchmark V3 candidates were pending and zero were accepted.
+
+## Placement V2 implementation and benchmark
+
+**Verified on 2026-09-03.** Placement V2 leaves the room rules, quantities, component categories, CV, routing, and BOQ formulas unchanged. It adds a reusable, deterministic `PlacementValidator` per room:
+
+- each proposed point is clamped to a safe inward room inset using only frozen room geometry;
+- wall-mounted components retain an intended wall side and stay wall-adjacent from inside the room;
+- accepted opening candidates are preferred over legacy doors for doorway placement; pending/rejected candidates remain inert through the existing adapter;
+- the legacy `outside_door` bathroom proposal is retained only for V1 benchmark comparison, then corrected inward by V2 validation;
+- occupied positions are resolved through a fixed candidate order, never random jitter; and
+- IDs use a room-local, per-component occurrence counter across all rules, preventing repeated rule blocks from restarting at `_0`.
+
+Every V2 component carries additive placement metadata: version, method, original/validated position, adjustment reason, intended wall side, door source, and collision-resolution flag. DB placement remains intentionally unchanged.
+
+The benchmark runner now emits current-proposal Placement V1 and validated Placement V2 overlays alongside the routing V1/V2/V2.1 overlays, and reports placement comparisons without changing the fixture definitions. Component counts are identical before and after for every fixture.
+
+| Plan | Components | Intended-room % V1 → V2 | Outside components V1 → V2 | Wall collisions V1 → V2 | Near-wall % V1 → V2 | Co-locations V1 → V2 | Duplicate IDs V1 → V2 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 01 | 71 | 92.9 → 100.0 | 0 → 0 | 6 → 5 | 40.4 → 93.0 | 7 → 0 | 1 → 0 |
+| 02 | 92 | 93.4 → 100.0 | 1 → 0 | 17 → 10 | 51.4 → 94.6 | 8 → 0 | 2 → 0 |
+| 03 | 91 | 92.2 → 100.0 | 0 → 0 | 3 → 2 | 58.0 → 94.2 | 7 → 0 | 5 → 0 |
+
+The V2 switch source counts (accepted / legacy / deterministic fallback) are 0 / 9 / 2, 0 / 8 / 6, and 0 / 14 / 1 for plans 01–03. It performed 55, 77, and 71 coordinate corrections and 14, 23, and 10 collision resolutions. All switches are now in their intended room, including the former routing endpoints `room_8_switch_1way_0` (plan 01), `room_10_switch_1way_0` and `room_8_switch_1way_0` (plan 02), and `room_12_switch_1way_0` (plan 03).
+
+Routing V2.1 was rerun without modification: all three fixtures have 0 outside routes, 0 suspicious routes, and 0 fallback routes. Raw/reported wire lengths are 538.96/619.75 m (plan 01), 667.86/768.03 m (plan 02), and 1033.55/1188.56 m (plan 03). The remaining 17 fixture wall-mask hits are disclosed rather than hidden: production placement receives frozen room geometry but not the raster wall mask, so it cannot safely make pixel-level wall claims. The rectangular inset materially reduces hits (26 → 17 overall) while keeping 93.0–94.6% of wall-mounted points near their intended wall.
 
 ## Routing V2.1 implementation and benchmark
 
@@ -174,19 +201,19 @@ The DB heuristic remains simplistic and can worsen total length because it choos
 
 ## 12. Known failures, ordered by current severity
 
-1. **Placement:** co-located components, wall-mask collisions, duplicate IDs, and boundary/outside switch placements remain; Routing V2.1 reports their route impact.
-2. **Electrical rules/BOQ:** static rules and heuristic consumables are not circuit/load/code aware.
-3. **Architectural input:** room labels and legacy openings remain heuristic upstream constraints; V3 candidates are intentionally pending/inert.
+1. **Electrical rules/BOQ:** static rules and heuristic consumables are not circuit/load/code aware.
+2. **Architectural input:** room labels and legacy openings remain heuristic upstream constraints; V3 candidates are intentionally pending/inert.
+3. **Raster wall-mask precision:** Placement V2 has room geometry but no production wall-mask input. The remaining 17 benchmark pixel-mask hits should remain visible for a future geometry/product-data decision, not be fixed with fixture-specific coordinates.
 
 ## 13. Frozen decisions and current blocker
 
-**Frozen decisions.** Preserve room segmentation V1, opening detector V3, benchmark fixtures, additive opening review, and legacy compatibility. Do not merge `recovered-sunday-tuesday` into `main`. Routing V2.1 is frozen for Phase 1: it is deterministic, retains explicit V1 fallback, honors accepted/legacy openings without trusting pending/rejected candidates, and does not regress benchmark containment.
+**Frozen decisions.** Preserve room segmentation V1, opening detector V3, benchmark fixtures, additive opening review, legacy compatibility, Routing V2.1, and Placement V2. Placement V2 is frozen for Phase 1: it is deterministic, keeps quantities unchanged, eliminates duplicate IDs/co-locations/outside components, brings all components into intended rooms, and removes all benchmark suspicious routes. Do not merge `recovered-sunday-tuesday` into `main`.
 
-**Current blocker (verified).** Placement quality is now the dominant Phase-1 issue: co-locations, wall-mask collisions, duplicate IDs, and boundary/outside switch placements cause the remaining modeled-domain failures. The previous architecture-blind star-routing blocker and unvalidated geometry-only transition concern are no longer dominant.
+**Current blocker (verified).** No remaining Phase-1 backend blocker justifies another placement pass. The outstanding non-code-ready limitations are static electrical rules/BOQ heuristics and disclosed raster wall-mask precision; neither warrants reopening frozen placement before editor work.
 
 ## 14. One next recommended milestone
 
-Perform a narrowly scoped **placement-quality cleanup**: resolve severe component co-locations, duplicate IDs, wall-mask collisions, and boundary/outside placements while preserving frozen room segmentation, opening detection, Routing V2.1, placement quantities, 2D/3D interfaces, and BOM formulas except for resulting route lengths.
+Build the **editable 2D engineering canvas** using stable Placement V2 component IDs/coordinates and synchronized BOQ state. Do not start it until separately authorized.
 
 ## 15. Future roadmap
 
@@ -201,13 +228,13 @@ Perform a narrowly scoped **placement-quality cleanup**: resolve severe componen
 .\.venv\Scripts\python.exe -m benchmarks.run_electrical_benchmark fixtures\benchmarks --output-dir <temporary-output-dir>
 ```
 
-The tracked suite passed: **39 tests, 0 failures** with OpenCV 4.10.0.84. The four added routing tests cover accepted-opening preference, pending/rejected candidate exclusion, legacy opening use, and deterministic V2.1 output; the existing disconnected graph test continues to cover declared V1 fallback. `requirements.txt` pins that version because the previous unbounded OpenCV dependency resolved to OpenCV 5.0.0.93 and produced 7 V3 test errors due to a `HoughLinesP` array-shape assumption. Tesseract was unavailable during benchmark regeneration; the code skipped OCR gracefully and used its existing scale fallback.
+The tracked suite passed: **44 tests, 0 failures** with OpenCV 4.10.0.84. The five Placement V2 tests cover deterministic unique IDs/count preservation, inward switch placement, accepted/legacy/fallback door priority, wall/interior containment plus co-location resolution, and Routing V2.1 compatibility. The existing routing tests continue to cover declared V1 fallback. `requirements.txt` pins that version because the previous unbounded OpenCV dependency resolved to OpenCV 5.0.0.93 and produced 7 V3 test errors due to a `HoughLinesP` array-shape assumption. Tesseract was unavailable during benchmark regeneration; the code skipped OCR gracefully and used its existing scale fallback.
 
 ## 17. Important files
 
 - `app.py`, `static/index.html`
 - `core/cv_analyzer.py`, `core/openings.py`, `core/openings_v2.py`, `core/opening_symbols.py`
-- `core/rules_engine.py`, `core/geometry.py`, `core/routing.py`, `core/renderer.py`, `core/symbols.py`
+- `core/rules_engine.py`, `core/placement.py`, `core/geometry.py`, `core/routing.py`, `core/renderer.py`, `core/symbols.py`
 - `benchmarks/runner.py`, `benchmarks/geometric.py`, `benchmarks/opening_metrics.py`
 - `benchmarks/electrical_benchmark.py`, `benchmarks/run_electrical_benchmark.py`, `benchmarks/ELECTRICAL_BENCHMARK_V1.md`
 - `fixtures/benchmarks/plan_*.png` and `fixtures/benchmarks/plan_*.annotation.json`
@@ -240,6 +267,7 @@ The local Git identity is `Srushti Admuthe <srushtiadmuthe1001@gmail.com>`, not 
 
 ## 21. Change log / milestones
 
+- 2026-09-03: Implemented Placement V2: room-local deterministic validation, inward switch correction, accepted/legacy/fallback door provenance, collision resolution, and stable unique IDs. All 44 tests passed. The three fixtures retain component counts, reach 100% intended-room containment, have zero duplicates/co-locations/outside components, reduce wall-mask hits 26 to 17, and reduce routing outside/suspicious/fallback counts to zero. Placement V2 is frozen for Phase 1.
 - 2026-09-03: Implemented Routing V2.1 portal validation. The default router now prefers accepted openings, then credible legacy doors, then constrained geometric portals; pending/rejected candidates remain inert. The runner produces V1/V2/V2.1 comparisons and overlays. All 39 tests passed; V2.1 improved plan 02 containment (3 to 2 bad routes) and did not regress plans 01 or 03. Routing V2.1 is frozen for Phase 1.
 - 2026-09-03: Implemented Routing V2 with a deterministic room-graph domain, explicit transition/fallback metadata, V1/V2 benchmark comparison, and paired overlays. Pin OpenCV 4.10.0.84 and correct the README fixture statement. Routing is improved but not frozen.
 - 2026-09-03: Created this verified continuity checkpoint, added targeted `.gitignore`, regenerated the electrical audit in temporary storage, and confirmed routing as the next milestone. No production algorithm changed.

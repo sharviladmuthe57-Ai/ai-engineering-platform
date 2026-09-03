@@ -8,6 +8,7 @@ BOM derived entirely from placed components (no estimates).
 
 import math
 from .rules_engine import get_rules, compute_position, COMPONENTS
+from .placement import PlacementValidator, preferred_door_source
 from .routing import legacy_manhattan_route, path_length as routing_path_length, route_component
 
 BUFFER = 1.15   # 15% wire slack
@@ -37,7 +38,7 @@ ROOM_FILL = {
 # ═════════════════════════════════════════════════════════════════════════════
 #  MAIN ENTRY POINT
 # ═════════════════════════════════════════════════════════════════════════════
-def generate_layout(vision_data: dict, project_type: str = "electrical", routing_version: str = "v2.1") -> dict:
+def generate_layout(vision_data: dict, project_type: str = "electrical", routing_version: str = "v2.1", placement_version: str = "v2") -> dict:
     rooms    = vision_data.get("rooms",    [])
     elements = vision_data.get("detected_elements", [])
 
@@ -52,6 +53,8 @@ def generate_layout(vision_data: dict, project_type: str = "electrical", routing
         for room in rooms:
             room_type = room.get("name", "unknown")
             rules     = get_rules(room_type)
+            validator = PlacementValidator(room) if placement_version == "v2" else None
+            component_occurrences = {}
 
             for (comp_id, qty, pos_hint) in rules:
                 spec = COMPONENTS.get(comp_id, {})
@@ -61,33 +64,50 @@ def generate_layout(vision_data: dict, project_type: str = "electrical", routing
                 positions = _spread_positions(pos, qty, room, pos_hint)
 
                 for i, p in enumerate(positions):
-                    placed.append({
-                        "id"       : f"{room['id']}_{comp_id}_{i}",
+                    occurrence = component_occurrences.get(comp_id, 0) if validator else i
+                    component_occurrences[comp_id] = occurrence + 1
+                    if validator:
+                        validated_pos, placement = validator.validate(p, pos_hint)
+                    else:
+                        validated_pos = p
+                        placement = {
+                            "placement_version": "v1", "placement_method": "unvalidated_rule_position",
+                            "placement_adjusted": False, "adjustment_reason": None,
+                            "original_position": p, "validated_position": p,
+                            "wall_side": None, "collision_resolved": False,
+                        }
+                    component_id = f"{room['id']}_{comp_id}_{occurrence}"
+                    component = {
+                        "id"       : component_id,
                         "room_id"  : room["id"],
                         "room_name": room_type,
                         "comp_id"  : comp_id,
                         "label"    : spec.get("label", comp_id),
                         "symbol"   : spec.get("symbol", "outlet"),
-                        "pos"      : p,
+                        "pos"      : validated_pos,
                         "qty"      : 1,
-                    })
+                        "rule_hint": pos_hint,
+                        "door_source": preferred_door_source(room, pos_hint),
+                        **placement,
+                    }
+                    placed.append(component)
 
                     # V2 stays inside the detected room domain when a connected
                     # architectural path exists. V1 remains available for audit.
                     if routing_version == "v1":
                         routing = {
-                            "waypoints": wall_route(db_pos, p), "routing_version": "v1",
+                            "waypoints": wall_route(db_pos, validated_pos), "routing_version": "v1",
                             "architecture_aware": False, "fallback_used": False,
                             "fallback_reason": None, "source_room": None,
                             "target_room": room["id"], "traversed_rooms": [],
                             "controlled_transitions": [],
                         }
                     else:
-                        routing = route_component(db_pos, p, room["id"], rooms, routing_version=routing_version)
+                        routing = route_component(db_pos, validated_pos, room["id"], rooms, routing_version=routing_version)
                     route = routing["waypoints"]
                     routes.append({
                         "from"      : "db",
-                        "to"        : f"{room['id']}_{comp_id}",
+                        "to"        : component_id,
                         "waypoints" : route,
                         "length_m"  : round(path_length(route) * BUFFER, 2),
                         "symbol"    : spec.get("symbol","outlet"),
@@ -155,6 +175,7 @@ def generate_layout(vision_data: dict, project_type: str = "electrical", routing
         "unit"              : vision_data.get("unit","metres"),
         "project_type"      : project_type,
         "routing_version"   : routing_version,
+        "placement_version" : placement_version,
         "rooms"             : rooms,
         "db_pos"            : db_pos,
         "placed_components" : placed,

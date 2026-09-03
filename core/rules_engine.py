@@ -9,7 +9,7 @@ Each room type has:
 Component positions explained:
   centroid      → ceiling centre (lights, fans)
   centroid_off  → offset from centre (fan when light also on ceiling)
-  near_door     → 0.3m from door frame (switches)
+  near_door     → 0.3m from door frame, inside the intended room (switches)
   wall_n/s/e/w  → along that wall, at mid-height
   high_wall     → 2.1m height (AC, exhaust fan)
   corner_ne/nw  → near corner on that wall
@@ -83,7 +83,7 @@ ROOM_RULES = {
     "bathroom": [
         ("ceiling_light", 1, "centroid"),     # waterproof
         ("exhaust_fan",   1, "high_wall_n"),
-        ("switch_1way",   1, "outside_door"), # switch OUTSIDE bathroom
+        ("switch_1way",   1, "outside_door"), # corrected by Placement V2 validation
         ("geyser_point",  1, "high_wall_e"),
         ("outlet_2pin",   1, "wall_s"),       # shaver socket
     ],
@@ -192,7 +192,6 @@ def compute_position(hint: str, room: dict) -> tuple:
         "corner_nw"      : (rx + WALL_INSET, ry + rh - WALL_INSET),
         "corner_se"      : (rx + rw - WALL_INSET, ry + WALL_INSET),
         "corner_sw"      : (rx + WALL_INSET, ry + WALL_INSET),
-        "outside_door"   : _outside_door(room),
     }
 
     if hint in POS:
@@ -203,12 +202,15 @@ def compute_position(hint: str, room: dict) -> tuple:
     if hint == "near_door_2":
         return _near_door(room, 1)
 
+    if hint == "outside_door":
+        return _outside_door(room)
+
     return (cx, cy)   # fallback
 
 
 def _near_door(room, door_idx=0):
     """Position just inside the door."""
-    doors = room.get("doors", [])
+    doors = _ordered_doors(room)
     rx,ry = room["x"],     room["y"]
     rw,rh = room["width"], room["height"]
     INSET = 0.30
@@ -222,24 +224,42 @@ def _near_door(room, door_idx=0):
         if wl=="left":   return (rx+INSET,     ry+p)
         if wl=="right":  return (rx+rw-INSET,  ry+p)
 
-    # No door info — default: bottom-left inside corner
+    # No door info — deterministic wall-adjacent interior fallback.
     return (rx+INSET, ry+INSET)
 
 
+def _ordered_doors(room):
+    """Return accepted openings before legacy doors without trusting pending data.
+
+    Pending and rejected candidates never reach ``rooms[].doors`` through the
+    compatibility adapter.  The remaining ``verified_opening_candidate`` doors
+    are therefore safe to prefer over the legacy CV door list.
+    """
+    doors = list(room.get("doors", []))
+    ranked = sorted(enumerate(doors), key=lambda item: (
+        0 if item[1].get("source") == "verified_opening_candidate" else 1,
+        item[0],
+    ))
+    return [door for _index, door in ranked]
+
+
 def _outside_door(room):
-    """Switch placed just outside the bathroom door."""
-    doors = room.get("doors",[])
-    rx,ry = room["x"],room["y"]
-    rw,rh = room["width"],room["height"]
-    OUTSET = 0.25
+    """Legacy bathroom-switch proposal retained for Placement V1 comparison.
 
+    Placement V2 validates this candidate back inside the intended room before
+    generation. Keeping the proposal here makes before/after benchmark output
+    comparable without changing the room rule catalogue.
+    """
+    doors = _ordered_doors(room)
+    rx, ry = room["x"], room["y"]
+    rw, rh = room["width"], room["height"]
+    outset = 0.25
     if doors:
-        d  = doors[0]
-        wl = d.get("wall","bottom")
-        p  = d.get("position", rw/2)
-        if wl=="bottom": return (rx+p, ry-OUTSET)
-        if wl=="top":    return (rx+p, ry+rh+OUTSET)
-        if wl=="left":   return (rx-OUTSET, ry+p)
-        if wl=="right":  return (rx+rw+OUTSET, ry+p)
-
-    return (rx - OUTSET, ry + rh/2)
+        door = doors[0]
+        wall = door.get("wall", "bottom")
+        position = door.get("position", rw / 2)
+        if wall == "bottom": return (rx + position, ry - outset)
+        if wall == "top": return (rx + position, ry + rh + outset)
+        if wall == "left": return (rx - outset, ry + position)
+        if wall == "right": return (rx + rw + outset, ry + position)
+    return (rx - outset, ry + rh / 2)

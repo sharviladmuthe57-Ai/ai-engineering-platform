@@ -54,6 +54,15 @@ def _wall_distance(point: tuple[float, float], room: dict[str, Any]) -> tuple[fl
     return round(values[side], 3), side
 
 
+def _wall_distance_to_side(point: tuple[float, float], room: dict[str, Any], side: str) -> float:
+    x, y = point
+    values = {
+        "left": abs(x - room["x"]), "right": abs(room["x"] + room["width"] - x),
+        "bottom": abs(y - room["y"]), "top": abs(room["y"] + room["height"] - y),
+    }
+    return round(values[side], 3)
+
+
 def _room_doors(room: dict[str, Any]) -> list[tuple[float, float]]:
     points = []
     for door in room.get("doors", []):
@@ -102,7 +111,10 @@ def _component_records(layout: dict[str, Any], wall_mask: np.ndarray, scale_x: f
         wall_distance, wall_side = _wall_distance(point, room) if finite and room else (None, None)
         doors = _room_doors(room) if room else []
         door_distance = min((math.dist(point, door) for door in doors), default=None) if finite else None
-        hint = _rule_hints(room).get(component["comp_id"]) if room else "db_heuristic"
+        hint = component.get("rule_hint") or (_rule_hints(room).get(component["comp_id"]) if room else "db_heuristic")
+        intended_side = component.get("wall_side")
+        if finite and room and intended_side:
+            wall_distance, wall_side = _wall_distance_to_side(point, room, intended_side), intended_side
         threshold = min(.35, .15 * min(room["width"], room["height"])) if room else None
         record = {
             "id": component["id"], "component_type": component["comp_id"], "label": component["label"],
@@ -115,6 +127,12 @@ def _component_records(layout: dict[str, Any], wall_mask: np.ndarray, scale_x: f
             "near_associated_wall": (wall_distance <= threshold) if threshold is not None else None,
             "distance_to_nearest_usable_legacy_door_m": round(door_distance, 3) if door_distance is not None else None,
             "wall_mask_collision": _pixel_wall_collision(point, wall_mask, scale_x, scale_y) if finite else None,
+            "placement_version": component.get("placement_version", "v1"),
+            "placement_method": component.get("placement_method"),
+            "placement_adjusted": bool(component.get("placement_adjusted", False)),
+            "adjustment_reason": component.get("adjustment_reason"),
+            "door_source": component.get("door_source"),
+            "collision_resolved": bool(component.get("collision_resolved", False)),
             "duplicate_or_collision": False,
         }
         records.append(record)
@@ -266,6 +284,9 @@ def _quality(records: list[dict[str, Any]], routes: list[dict[str, Any]], collis
     switches = [item for item in non_db if item["component_type"] in {"switch_1way", "switch_2way"}]
     with_door = [item for item in switches if item["distance_to_nearest_usable_legacy_door_m"] is not None]
     near_door = [item for item in with_door if item["distance_to_nearest_usable_legacy_door_m"] <= .8]
+    accepted_door = [item for item in switches if item["door_source"] == "accepted_opening"]
+    legacy_door = [item for item in switches if item["door_source"] == "legacy_door"]
+    fallback_switches = [item for item in switches if item["door_source"] == "wall_fallback"]
     def percentage(items: list[Any], predicate) -> float | None:
         return round(100 * sum(bool(predicate(item)) for item in items) / len(items), 1) if items else None
     return {
@@ -274,6 +295,11 @@ def _quality(records: list[dict[str, Any]], routes: list[dict[str, Any]], collis
         "inside_building_percent": percentage(non_db, lambda item: item["inside_building"]),
         "wall_mounted_near_wall_percent": percentage(mounted, lambda item: item["near_associated_wall"]),
         "switches_with_usable_legacy_door": len(with_door), "switches_near_usable_door_percent": percentage(with_door, lambda item: item in near_door),
+        "switches_using_accepted_door_placement": len(accepted_door),
+        "switches_using_legacy_door_placement": len(legacy_door),
+        "switches_using_fallback_placement": len(fallback_switches),
+        "placement_corrections_performed": sum(item["placement_adjusted"] for item in non_db),
+        "collision_resolutions_performed": sum(item["collision_resolved"] for item in non_db),
         "wall_mask_collisions": sum(item["wall_mask_collision"] is True for item in non_db),
         "outside_building_components": sum(not item["inside_building"] for item in non_db),
         "component_collisions": len(collisions), "outside_building_routes": sum(route["outside_building"] for route in routes),
@@ -286,7 +312,7 @@ def _counts(records: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted(values.items()))
 
 
-def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3", routing_version: str = "v2.1") -> dict[str, Any]:
+def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3", routing_version: str = "v2.1", placement_version: str = "v2") -> dict[str, Any]:
     """Run frozen architecture → frozen electrical engine and audit its output."""
     if validate_expectations():
         raise ValueError("Electrical expectation schema is invalid")
@@ -298,7 +324,7 @@ def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3",
     # openings can alter legacy room doors/windows. Frozen benchmark outputs
     # currently contain pending V3 candidates, so electrical inputs stay stable.
     vision["rooms"] = apply_verified_openings_to_rooms(vision.get("rooms", []), vision.get("opening_candidates", []))
-    layout = generate_layout(vision, "electrical", routing_version=routing_version)
+    layout = generate_layout(vision, "electrical", routing_version=routing_version, placement_version=placement_version)
     image = cv2.imread(str(image_path))
     if image is None:
         raise ValueError(f"Cannot load {image_path}")
@@ -312,7 +338,7 @@ def run_electrical_plan(image_path: str | Path, *, opening_detector: str = "v3",
     rooms = [{"room_id": room["id"], "label": room.get("name"), "dimensions_m": {"width": room["width"], "height": room["height"]}, "area_m2": room.get("area_m2"), "legacy_door_count": len(room.get("doors", [])), "legacy_window_count": len(room.get("windows", []))} for room in layout["rooms"]]
     return {
         "plan_id": Path(image_path).stem, "success": True, "opening_detector": opening_detector,
-        "routing_version": routing_version,
+        "routing_version": routing_version, "placement_version": placement_version,
         "architectural_input": {"room_count": len(rooms), "opening_candidates_pending": sum(item.get("verification_status") == "pending" for item in vision.get("opening_candidates", [])), "accepted_opening_candidates": sum(item.get("verification_status") == "accepted" for item in vision.get("opening_candidates", [])), "legacy_room_doors_used_by_engine": sum(len(room.get("doors", [])) for room in layout["rooms"])},
         "rooms": rooms, "db_location_m": {"x": layout["db_pos"][0], "y": layout["db_pos"][1]},
         "components": components, "component_counts": _counts(components), "total_component_count": len(components),
@@ -376,7 +402,7 @@ def render_electrical_overlay(report: dict[str, Any], output_path: str | Path) -
         cv2.drawMarker(canvas, (width + 22, y), color, cv2.MARKER_CROSS, 10, 2, cv2.LINE_AA)
         cv2.putText(canvas, label, (width + 38, y + 4), cv2.FONT_HERSHEY_SIMPLEX, .43, (235, 235, 235), 1, cv2.LINE_AA)
     quality = report["placement_quality"]
-    lines = [f"Routing: {report.get('routing_version', 'v1').upper()}", f"Components: {report['total_component_count']}", f"Routes: {report['total_route_count']}", f"Wire: {report['total_reported_wire_length_m']} m", f"Wall collisions: {quality['wall_mask_collisions']}", f"Co-locations: {quality['component_collisions']}"]
+    lines = [f"Routing: {report.get('routing_version', 'v1').upper()}", f"Placement: {report.get('placement_version', 'v1').upper()}", f"Components: {report['total_component_count']}", f"Routes: {report['total_route_count']}", f"Wire: {report['total_reported_wire_length_m']} m", f"Wall collisions: {quality['wall_mask_collisions']}", f"Co-locations: {quality['component_collisions']}"]
     for index, line in enumerate(lines):
         cv2.putText(canvas, line, (width + 12, 310 + index * 22), cv2.FONT_HERSHEY_SIMPLEX, .43, (220, 220, 220), 1, cv2.LINE_AA)
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
