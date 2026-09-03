@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+const media=[{label:"PLAN UNDERSTANDING",path:"/product/architecture-understanding.png"},{label:"ELECTRICAL LAYOUT",path:"/product/electrical-layout.png"},{label:"BILL OF QUANTITIES",path:"/product/boq.png"}];
+export function ProductShowcase(){const[active,setActive]=useState(0);return <div className="showcase"><div className="showcaseTabs" role="tablist" aria-label="Prototype media">{media.map((m,i)=><button key={m.label} role="tab" aria-selected={active===i} onClick={()=>setActive(i)}><span>0{i+1}</span>{m.label}</button>)}</div><div className="prototypeFrame" role="tabpanel"><div className="frameTop"><span/><span>PROTOTYPE VIEW / {media[active].label}</span><span>MEDIA SLOT</span></div><div className="placeholder"><div className="planLines"><i/><i/><i/><i/><i/></div><span>PROTOTYPE MEDIA</span><strong>{media[active].label}</strong><small>Replace with {media[active].path}</small></div></div></div>}

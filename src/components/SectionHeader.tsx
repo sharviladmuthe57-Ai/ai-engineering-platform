@@ -1,0 +1,1 @@
+export function SectionHeader({eyebrow,title,id}:{eyebrow:string;title:React.ReactNode;id?:string}){return <header className="sectionHeader"><span className="eyebrow">{eyebrow}</span><h2 id={id}>{title}</h2></header>}

@@ -23,3 +23,12 @@ jobs/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Next.js
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+.vercel/
+.pnpm-store/
