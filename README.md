@@ -57,6 +57,20 @@ Open http://localhost:8000.
 The UI accepts raster image files. PDF ingestion, precise polygons/walls,
 editable CAD geometry, and 3D visualization are not implemented yet.
 
+## Product website
+
+The marketing site is the Next.js application at the repository root.
+
+```bash
+pnpm dev
+pnpm build
+```
+
+It uses the real local product artifacts in `public/product/`: an architectural
+input plan, vision/geometry analysis, a structured plan state, and a generated
+electrical routing/BOQ output. The editable 2D electrical canvas is available
+from the local application after a plan is processed.
+
 ## APIs
 
 - `POST /upload` — store an image and return rooms, legacy openings, and

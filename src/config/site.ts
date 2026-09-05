@@ -9,7 +9,7 @@ export const siteConfig = {
     "AI-native engineering design, starting with electrical systems generated from architectural drawings.",
   navigation: [
     { label: "Product", href: "#product" },
-    { label: "Approach", href: "#approach" },
+    { label: "How it works", href: "#approach" },
     { label: "Vision", href: "#vision" },
     { label: "Feedback", href: "#feedback" },
   ],
