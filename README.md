@@ -62,14 +62,43 @@ editable CAD geometry, and 3D visualization are not implemented yet.
 The marketing site is the Next.js application at the repository root.
 
 ```bash
-pnpm dev
+pnpm dev --webpack --hostname 127.0.0.1 --port 3001
 pnpm build
+pnpm start --hostname 127.0.0.1 --port 3001
 ```
+
+Open [the website](http://127.0.0.1:3001/) while its server is running.
+These are two separate applications: Next.js serves the marketing site, and
+FastAPI serves the interactive electrical prototype. A localhost link only
+works on the computer running that server, and must be restarted after closing
+its process or restarting the computer. The production `start` command requires
+a successful `build` first. No hosting or paid services are required.
 
 It uses the real local product artifacts in `public/product/`: an architectural
 input plan, vision/geometry analysis, a structured plan state, and a generated
 electrical routing/BOQ output. The editable 2D electrical canvas is available
 from the local application after a plan is processed.
+
+The website's editor frame is a clearly labeled, read-only export of the actual
+editor, not a second editing implementation. `static/editor.js` and
+`static/editor.css` provide the working editor in FastAPI. Process a plan there,
+then open its editable canvas; its `?editor_job=...` URL preserves the project
+on reload. The three images in `public/vision/` are supplied BIM references for
+the **Vision / Next** chapter, not generated outputs. Interactive 3D remains
+unimplemented.
+
+Asset maintenance (only needed when refreshing the evidence):
+
+```bash
+node scripts/export-website-proof.mjs <completed-local-job-id>
+python scripts/export-video-posters.py
+node scripts/prepare-vision-assets.mjs <reference-1.png> <reference-2.png> <reference-3.png>
+```
+
+The proof exporter requires an existing completed editable job and its original
+PNG in the local ignored runtime folders. The committed, sanitized exports and
+assets are sufficient for a website build on another computer. Original local
+jobs, uploads, temporary screenshots, and caches must not be committed.
 
 ## APIs
 

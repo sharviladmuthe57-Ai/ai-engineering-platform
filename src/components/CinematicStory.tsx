@@ -1,5 +1,56 @@
 "use client";
-import { motion,useReducedMotion,useScroll,useTransform } from "framer-motion";import { useEffect,useRef,useState } from "react";import { ArrowDown,ArrowRight } from "lucide-react";import { siteConfig } from "@/config/site";
-export function CinematicStory(){const ref=useRef<HTMLElement>(null);const videos=useRef<(HTMLVideoElement|null)[]>([]);const reduce=useReducedMotion();const[active,setActive]=useState(0);const{scrollYProgress}=useScroll({target:ref,offset:["start start","end end"]});useEffect(()=>scrollYProgress.on("change",v=>setActive(Math.min(6,Math.floor(v*7)))),[scrollYProgress]);useEffect(()=>{videos.current.forEach((v,i)=>{if(!v)return;i===active?v.play().catch(()=>{}):v.pause()})},[active]);return <section className="cinematic" ref={ref} id="top"><div className="cinematicSticky">{siteConfig.scenes.map((scene,i)=><Scene key={scene.id} scene={scene} index={i} active={active===i} videoRef={el=>{videos.current[i]=el}} reduced={!!reduce} progress={scrollYProgress}/>)}<div className="hero-product"><span>AI-NATIVE ENGINEERING DESIGN</span><b>STARTING WITH ELECTRICAL</b></div><div className="sceneRail">{siteConfig.scenes.map((s,i)=><span key={s.id} className={active===i?"active":""}/>)}</div><div className="scrollHint"><ArrowDown/> SCROLL TO FOLLOW</div></div></section>}
-type SceneType=typeof siteConfig.scenes[number];
-function Scene({scene,index,active,videoRef,reduced,progress}:{scene:SceneType;index:number;active:boolean;videoRef:(el:HTMLVideoElement|null)=>void;reduced:boolean;progress:ReturnType<typeof useScroll>["scrollYProgress"]}){const scale=useTransform(progress,[index/7,(index+1)/7],[1.04,1]);return <motion.article className={`scene ${active?"active":""}`} aria-hidden={!active} style={reduced?{}:{scale}}><video ref={videoRef} muted playsInline loop preload={index===0?"auto":"metadata"}><source src={scene.src} type="video/mp4"/></video><div className="sceneShade"/><div className="sceneGrid"/><motion.div className="sceneCopy" animate={{opacity:active?1:0,y:active?0:18}} transition={{duration:.65}}><span className="eyebrow">SCENE {String(scene.id).padStart(2,"0")} / 07</span><h1>{scene.title.map(line=><span key={line}>{line}</span>)}</h1>{scene.detail&&<p>{scene.detail}</p>}{index===6&&<div className="sceneActions"><a className="button primary" href="#product">See what we&apos;re building <ArrowRight/></a><a className="button ghost" href="#feedback">Share your workflow</a></div>}</motion.div></motion.article>}
+
+import { useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUpRight, Pause, Play } from "lucide-react";
+import { siteConfig } from "@/config/site";
+import { usePinnedProgress } from "@/hooks/usePinnedProgress";
+
+export function CinematicStory() {
+  const { ref, active, choose, visible, reduced } = usePinnedProgress(7);
+  const videos = useRef<(HTMLVideoElement | null)[]>([]);
+  const [paused, setPaused] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const shouldPlay = visible && !paused && !reduced;
+
+  useEffect(() => {
+    let cancelled = false;
+    videos.current.forEach((video, index) => {
+      if (!video) return;
+      if (index !== active || !shouldPlay) { video.pause(); return; }
+      video.muted = true;
+      video.play().then(() => { if (!cancelled) setBlocked(false); }).catch(() => { if (!cancelled) setBlocked(true); });
+    });
+    return () => { cancelled = true; videos.current.forEach(video => video?.pause()); };
+  }, [active, shouldPlay]);
+
+  return <section className="cinematic" ref={ref} id="top" data-scene={active + 1} aria-label="Seven chapters of engineering design">
+    <div className="cinematicSticky">
+      <div className="cinema-media" aria-hidden="true">
+        {siteConfig.scenes.map((scene, index) => <div key={scene.id} className={`scene ${active === index ? "active" : ""}`}>
+          <img src={`/videos/poster-${scene.id}.webp`} alt="" className="scene-poster" fetchPriority={index === 0 ? "high" : "auto"} loading={index === 0 ? "eager" : "lazy"}/>
+          {Math.abs(index - active) <= 1 && !reduced && <video
+            ref={node => { videos.current[index] = node; }} src={scene.src}
+            muted playsInline loop autoPlay={index === active && shouldPlay}
+            preload={index === active ? "auto" : "metadata"}
+            onCanPlay={event => { if (index === active && shouldPlay) event.currentTarget.play().catch(() => setBlocked(true)); }}
+          />}
+        </div>)}
+        <div className="cinema-shade"/>
+      </div>
+      <div className="cinema-content section-shell">
+        <div className="hero-topline"><span className="status-dot"/> AI-native engineering <span>Starting with electrical</span></div>
+        <div className={`hero-composition ${active === 0 ? "opening" : ""}`}>
+          <div className="hero-copy">
+            {active === 0 ? <><h1>From drawing.<br/>To electrical<br/><em>design.</em></h1><p>An engineering first draft from your architectural plan. Components, routes, and quantities—ready for an engineer to review.</p></> : <><span className="chapter-label">Chapter {String(active + 1).padStart(2, "0")} / 07</span><h2 key={active}>{siteConfig.scenes[active].title.join(" ")}</h2><p>{siteConfig.scenes[active].detail || "Every new tool changes what we can build. The next step begins with understanding the drawing."}</p></>}
+            <div className="cta-row"><a className="button primary" href="#product">Explore the prototype <ArrowUpRight/></a><a className="text-link" href="#feedback">Share your workflow <ArrowUpRight/></a></div>
+          </div>
+        </div>
+        <div className="cinema-bottom">
+          <div className="chapter-controls" aria-label="Choose cinematic chapter">{siteConfig.scenes.map((scene,index) => <button key={scene.id} onClick={() => choose(index)} aria-label={`Scene ${scene.id}`} aria-current={index === active ? "step" : undefined}><span>{String(scene.id).padStart(2,"0")}</span><i/></button>)}</div>
+          <span className="scroll-hint"><ArrowDown/> Scroll to follow the story</span>
+          <button className="play-toggle" onClick={() => { setPaused(!paused); if(blocked) { setPaused(false); videos.current[active]?.play().then(() => setBlocked(false)).catch(() => setBlocked(true)); } }} aria-label={paused || blocked ? "Play cinematic video" : "Pause cinematic video"} disabled={reduced}>{paused || blocked ? <Play/> : <Pause/>}</button>
+        </div>
+      </div>
+    </div>
+  </section>;
+}

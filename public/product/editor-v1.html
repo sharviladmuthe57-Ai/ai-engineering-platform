@@ -1,0 +1,494 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Actual Editable 2D Canvas V1 — static product export</title><style>
+:root{--bg:#0D1117;--panel:#161B22;--border:#30363D;--accent:#1A85FF;--green:#3FB950;--yellow:#D29922;--red:#F85149;--text:#E6EDF3;--muted:#8B949E;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;min-height:100vh}
+nav{background:var(--panel);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;height:56px;gap:12px}
+.logo{font-weight:700;font-size:16px;color:var(--accent)}
+.badge{background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.badge-cv{background:#6E40C9;color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.container{max-width:1140px;margin:0 auto;padding:28px 20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card h2{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.step-num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(26,133,255,.05)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .icon{font-size:34px;margin-bottom:10px}
+#preview-img{width:100%;border-radius:8px;border:1px solid var(--border);display:none;margin-top:12px;max-height:200px;object-fit:contain;background:#000}
+select,input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;margin-top:6px}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
+.dim-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.dim-row label{margin-top:0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-full{width:100%;justify-content:center;margin-top:14px}
+.status-bar{display:none;padding:10px 14px;border-radius:6px;margin-top:12px;font-size:13px;align-items:center;gap:8px}
+.status-bar.info{background:rgba(26,133,255,.12);border:1px solid rgba(26,133,255,.3);display:flex}
+.status-bar.success{background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3);display:flex}
+.status-bar.error{background:rgba(248,81,73,.12);border:1px solid rgba(248,81,73,.3);display:flex}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+#verify-section{display:none;margin-top:24px}
+#results-section{display:none;margin-top:24px}
+.room-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.room-card h4{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px;text-transform:uppercase}
+.room-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.room-fields label{margin-top:0}
+.room-fields input,.room-fields select{margin-top:2px;padding:5px 8px;font-size:12px}
+.warn{padding:8px 12px;background:rgba(210,153,34,.1);border-left:3px solid var(--yellow);border-radius:0 6px 6px 0;font-size:12px;color:var(--yellow);margin-bottom:6px}
+.debug-box{background:rgba(110,64,201,.08);border:1px solid rgba(110,64,201,.3);border-radius:6px;padding:10px 14px;font-size:11px;color:#9B7FE8;font-family:monospace;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;background:var(--bg);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid rgba(48,54,61,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.qty{background:var(--accent);color:#fff;padding:2px 8px;border-radius:20px;font-weight:700;font-size:12px;display:inline-block;min-width:36px;text-align:center}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid}
+.chip-b{color:var(--accent);border-color:var(--accent);background:rgba(26,133,255,.1)}
+.chip-g{color:var(--green);border-color:var(--green);background:rgba(63,185,80,.1)}
+.chip-y{color:var(--yellow);border-color:var(--yellow);background:rgba(210,153,34,.1)}
+.layout-img{width:100%;border-radius:8px;border:1px solid var(--border)}
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+.muted{color:var(--muted)}
+.conf-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.conf-bar{height:5px;background:var(--border);border-radius:3px;margin-bottom:14px}
+.conf-fill{height:100%;border-radius:3px;transition:width .5s}
+.section-title{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px}
+
+/* Shared visual language: graphite, warm paper, restrained technical accents. */
+.editor-shell {
+  --ed-bg: #18211d; --ed-paper: #f3f0e8; --ed-ink: #24372d;
+  --ed-accent: #a5e5df; --ed-muted: #b2c0b6; --ed-line: #ffffff23;
+  color: #f3f2ec; background: var(--ed-bg); border: 1px solid var(--ed-line);
+  border-radius: 26px; overflow: hidden; font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+}
+body:has(#editor-section[style*="block"]) { background: #101312; }
+body:has(#editor-section[style*="block"]) > .container { max-width: 1480px; }
+.editor-topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; }
+.editor-brand { display: flex; align-items: center; gap: 12px; }
+.editor-brand-mark { display: grid; place-items: center; width: 32px; height: 32px; color: var(--ed-accent); font-size: 26px; border: 1px solid #a5e5df66; border-radius: 9px; }
+.editor-title { display: block; font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
+.editor-subtitle { font-size: 12px; color: var(--ed-muted); }
+.editor-controls { display: flex; gap: 8px; align-items: center; }
+.editor-button, .editor-view > summary { display: inline-flex; justify-content: center; align-items: center; gap: 7px; min-height: 38px; padding: 9px 15px; border: 1px solid var(--ed-line); background: transparent; color: #e2eae4; border-radius: 99px; font: inherit; font-size: 13px; cursor: pointer; transition: background .2s, border-color .2s; white-space: nowrap; }
+.editor-button:hover, .editor-view > summary:hover { background: #ffffff0b; border-color: #a5e5df88; }
+.editor-button.editor-save { background: var(--ed-accent); color: #203c31; border-color: transparent; font-weight: 650; }
+.editor-button.editor-reset { color: #b5c0b8; border-color: transparent; padding-inline: 8px; }
+.editor-reset:hover { color: #edaaa1; }
+.editor-button:focus-visible, .editor-tool:focus-visible, .editor-view summary:focus-visible, .editor-shell details summary:focus-visible { outline: 2px solid var(--ed-accent); outline-offset: 3px; }
+.editor-button:disabled { opacity: .65; cursor: default; }
+.editor-view { position: relative; }
+.editor-view > summary { list-style: none; }
+.editor-view > summary::-webkit-details-marker { display: none; }
+.editor-view > div { position: absolute; z-index: 5; right: 0; top: 45px; width: 230px; border-radius: 16px; background: #26342c; padding: 16px; border: 1px solid var(--ed-line); box-shadow: 0 15px 35px #0005; }
+.editor-view p { font-size: 12px; line-height: 1.5; color: var(--ed-muted); margin-top: 12px; }
+.editor-toggle { display: flex; gap: 9px; align-items: center; margin: 0; font-size: 13px; color: #e8f0e8; }
+.editor-toggle input { accent-color: #5baf99; }
+.editor-guidance { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-top: 1px solid var(--ed-line); padding: 13px 22px; background: #a5e5df09; }
+.editor-guidance p { margin: 0; font-size: 13px; color: #b9ccc0; line-height: 1.5; }
+.editor-guidance strong { color: #e8f1e9; font-weight: 500; }
+.editor-status { color: var(--ed-accent); font-size: 12px; line-height: 1.4; text-align: right; }
+.editor-status.error { color: #ffc0b4; }
+.editor-stage { display: grid; grid-template-columns: minmax(0, 1fr) 235px; gap: 16px; padding: 16px; }
+.editor-drawing-area { min-width: 0; border-radius: 20px; overflow: hidden; background: var(--ed-paper); color: var(--ed-ink); display: flex; flex-direction: column; border: 1px solid #fff4; }
+.editor-palette { display: flex; align-items: center; gap: 5px; padding: 10px 15px; border-bottom: 1px solid #24372d22; flex-wrap: wrap; }
+.editor-palette[hidden] { display: none; }
+.editor-palette-label { font-size: 12px; color: #6c7b70; margin-right: 6px; }
+.editor-tool { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid transparent; border-radius: 99px; background: transparent; color: #3d5546; font: inherit; font-size: 13px; cursor: pointer; }
+.editor-tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.editor-tool:hover, .editor-tool.active { background: #d8e9e0; color: #18564b; border-color: #43867466; }
+.editor-tool:focus-visible { outline-color: #286c65; }
+.editor-canvas-wrap { position: relative; min-width: 0; height: clamp(380px, calc(100svh - 248px), 620px); background: white; overflow: hidden; flex: 0 0 auto; }
+.editor-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
+.editor-canvas.add-mode { cursor: crosshair; }
+.editor-canvas.is-dragging, .editor-canvas.is-dragging * { cursor: grabbing !important; }
+.editor-canvas .route { fill: none; stroke: #c38a24; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .8; pointer-events: none; }
+.editor-canvas .room-boundary { fill: #59ae9610; stroke: #4c94717a; stroke-width: 1; stroke-dasharray: 5 4; pointer-events: none; }
+.editor-canvas .component { cursor: grab; outline: none; }
+.editor-canvas .component .glyph { stroke: #fff; stroke-width: 1.5; fill: currentColor; transition: transform .15s; }
+.editor-canvas .component .hit-area { fill: transparent; }
+.editor-canvas .component.selected .selection-ring, .editor-canvas .component:hover .selection-ring, .editor-canvas .component:focus .selection-ring { opacity: 1; }
+.editor-canvas .component:hover .glyph { transform: scale(1.13); }
+.editor-canvas .selection-ring { opacity: 0; fill: #4c947117; stroke: #347b65; stroke-width: 1.7; transition: opacity .15s; pointer-events: none; }
+.editor-canvas .component.invalid .selection-ring { opacity: 1; stroke: #c15b46; fill: #c15b4626; }
+.editor-canvas .component-label { fill: white; font-size: 8px; font-weight: 600; text-anchor: middle; pointer-events: none; }
+.editor-legend { display: flex; flex-wrap: wrap; gap: 15px; padding: 10px 16px; border-top: 1px solid #24372d22; font-size: 11px; color: #617466; }
+.editor-legend > span { display: flex; align-items: center; gap: 5px; }
+.editor-legend i { width: 6px; height: 6px; border-radius: 50%; }
+.light-key { background: #a67921; }.switch-key { background: #407994; }.socket-key { background: #b86351; }.fan-key { background: #408570; }
+.editor-legend .editor-scale-note { margin-left: auto; }
+.editor-inspector { display: flex; flex-direction: column; min-width: 0; gap: 18px; }
+.editor-properties, .editor-boq { border: 1px solid var(--ed-line); border-radius: 18px; padding: 18px; background: #ffffff03; }
+.editor-properties { min-height: 185px; }
+.editor-properties h3 { margin: 0 0 7px; font-size: 19px; letter-spacing: -.035em; font-weight: 550; }
+.editor-properties p { color: var(--ed-muted); margin: 0 0 12px; font-size: 13px; line-height: 1.5; }
+.editor-properties .selection-position { color: #c4d4c8; font-size: 12px; margin-bottom: 14px; }
+.editor-properties .editor-delete { padding: 7px 12px; min-height: 32px; font-size: 12px; color: #efb6a9; border-color: #efb6a944; }
+.editor-properties .editor-delete:disabled { opacity: .45; cursor: default; }
+.editor-advanced { margin-top: 16px; }
+.editor-shell details > summary { cursor: pointer; }
+.editor-advanced > summary { font-size: 11px; color: #90a99a; }
+.editor-advanced dl { display: grid; gap: 5px; margin-top: 12px; font-size: 11px; }
+.editor-advanced dt { color: #90a99a; }.editor-advanced dd { margin: 0 0 6px; color: #bccdc2; overflow-wrap: anywhere; }
+.editor-empty { padding-top: 5px; }
+.editor-empty .empty-pointer { width: 28px; height: 28px; fill: none; stroke: var(--ed-accent); stroke-width: 1.5; margin-bottom: 12px; }
+.editor-empty h3 { font-size: 17px; }
+.editor-empty p { max-width: 180px; }
+.editor-boq { flex: 1; }
+.editor-boq h3 { font-size: 13px; font-weight: 550; margin: 0 0 16px; display: flex; justify-content: space-between; }
+.editor-boq h3 span { color: var(--ed-accent); font-weight: 400; font-size: 11px; }
+.boq-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.boq-summary > div { display: grid; gap: 4px; }
+.boq-summary strong { font-size: 26px; font-weight: 500; letter-spacing: -.045em; line-height: 1; }
+.boq-summary span { color: var(--ed-muted); font-size: 12px; }
+.editor-wire { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--ed-line); }
+.editor-wire > span { display: block; font-size: 12px; color: var(--ed-muted); margin-bottom: 5px; }
+.editor-wire strong { font-size: 26px; font-weight: 500; letter-spacing: -.04em; color: var(--ed-accent); }
+.editor-wire small { font-size: 13px; font-weight: 400; }
+.boq-details { margin-top: 16px; }
+.boq-details > summary { font-size: 12px; color: var(--ed-accent); padding-block: 5px; }
+.boq-details > div { max-height: 240px; overflow: auto; margin-top: 10px; }
+.boq-details table { font-size: 11px; border-collapse: collapse; width: 100%; }
+.boq-details td, .boq-details th { padding: 7px 3px; border-bottom: 1px solid var(--ed-line); }
+.boq-details th { text-align: left; background: transparent; color: #a1b7aa; font-size: 10px; }
+.boq-details th:nth-child(n+2), .boq-details td:nth-child(n+2) { text-align: right; }
+.editor-shell[aria-busy="true"] .editor-tool, .editor-shell[aria-busy="true"] .editor-button { pointer-events: none; opacity: .6; }
+@media (max-width: 1000px) {
+  .editor-stage { grid-template-columns: minmax(0,1fr) 205px; gap: 12px; padding: 12px; }
+  .editor-properties, .editor-boq { padding: 15px; }
+  .editor-topbar { padding: 16px; gap: 14px; flex-wrap: wrap; }
+}
+@media (max-width: 700px) {
+  .editor-shell { border-radius: 20px; }
+  .editor-topbar { align-items: flex-start; gap: 18px; }
+  .editor-brand { width: 100%; }
+  .editor-controls { flex-wrap: wrap; width: 100%; gap: 5px; }
+  .editor-button, .editor-view > summary { padding: 8px 13px; min-height: 36px; }
+  .editor-guidance { display: block; padding: 12px 16px; }
+  .editor-guidance p { font-size: 12px; }
+  .editor-guidance strong { display: block; }
+  .editor-status { display: block; text-align: left; margin-top: 8px; }
+  .editor-stage { display: block; padding: 10px; }
+  .editor-palette { gap: 3px; padding: 9px; }
+  .editor-palette-label { display: none; }
+  .editor-tool { gap: 4px; padding: 7px 9px; font-size: 12px; }
+  .editor-tool svg { width: 16px; height: 16px; }
+  .editor-canvas-wrap { height: 370px; }
+  .editor-legend { gap: 10px; font-size: 10px; padding: 10px; }
+  .editor-scale-note { display: none!important; }
+  .editor-inspector { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .editor-properties { min-height: 0; }
+  .editor-properties, .editor-boq { padding: 13px; }
+  .editor-properties h3 { font-size: 16px; }
+  .editor-properties p { font-size: 12px; }
+  .boq-summary { gap: 14px; }
+  .boq-summary strong, .editor-wire strong { font-size: 23px; }
+  .boq-summary span { font-size: 11px; }
+  .editor-wire { margin-top: 14px; padding-top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .editor-shell *, .editor-shell *::before { transition: none!important; } }
+
+body{min-height:0}.editor-shell{border:0;border-radius:0}.editor-canvas-wrap{height:500px}@media(max-width:700px){.editor-canvas-wrap{height:370px}}</style><body><div class="editor-shell">
+      <div class="editor-topbar">
+        <div class="editor-brand"><span class="editor-brand-mark" aria-hidden="true">⌁</span><div><span id="editor-title" class="editor-title">Electrical drawing</span><span class="editor-subtitle">Editable 2D workspace</span></div></div>
+        <div class="editor-controls">
+          <button disabled tabindex="-1" id="editor-add-toggle" class="editor-button" aria-expanded="true" aria-controls="editor-palette">+ Add</button>
+          <button disabled tabindex="-1" id="editor-fit" class="editor-button">Fit</button>
+          <button disabled tabindex="-1" id="editor-save" class="editor-button editor-save">Save</button>
+          <details class="editor-view"><summary>View</summary><div><label class="editor-toggle"><input disabled checked type="checkbox" id="editor-room-toggle"> Room boundaries</label><p>Scroll over the drawing to zoom. Drag empty space to pan.</p></div></details>
+          <button disabled tabindex="-1" id="editor-reset" class="editor-button editor-reset">Reset</button>
+        </div>
+      </div>
+      <div class="editor-guidance"><p id="editor-instruction"><strong>Click an item to select it. Drag to move.</strong> Choose + Add to place a new one.</p><span id="editor-status" class="editor-status" role="status" aria-live="polite">Product snapshot · editing available in the local prototype</span></div>
+      <div class="editor-stage">
+        <div class="editor-drawing-area">
+          <div id="editor-palette" class="editor-palette" role="toolbar" aria-label="Add an electrical component">
+            <span class="editor-palette-label">Add</span>
+            <button disabled tabindex="-1" class="editor-tool" data-component-type="ceiling_light" aria-label="Add Light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6m-5 3h4M8.5 14a6 6 0 1 1 7 0L15 18H9z"/></svg>Light</button>
+            <button disabled tabindex="-1" class="editor-tool" data-component-type="ceiling_fan" aria-label="Add Fan" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M12 10C5 3 16 0 16 6c0 2-2 4-4 4Zm2 3c10-2 6 10 1 6-2-1-2-4-1-6Zm-3 1c-2 10-11 1-5-1 2-1 4 0 5 1Z"/></svg>Fan</button>
+            <button disabled tabindex="-1" class="editor-tool" data-component-type="switch_1way" aria-label="Add Switch" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="4"/><path d="m10 14 4-4"/></svg>Switch</button>
+            <button disabled tabindex="-1" class="editor-tool" data-component-type="outlet_2pin" aria-label="Add Socket" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v4m6-4v4m-3 3v2"/></svg>Socket</button>
+          </div>
+          <main class="editor-canvas-wrap">
+            <svg id="editor-canvas" class="editor-canvas" viewBox="0 0 824 582" aria-label="Real electrical plan with components and routes"><g id="editor-camera" transform="translate(0 0) scale(1)"><image href="./electrical-input.png" x="0" y="0" width="824" height="582"/><g><rect class="room-boundary" x="160.7142857142857" y="231.0384615384615" width="451.23626373626377" height="280.2197802197802"/><rect class="room-boundary" x="550.8241758241758" y="29.80219780219784" width="192.9945054945055" height="236.95054945054946"/><rect class="room-boundary" x="379.8076923076923" y="29.80219780219784" width="160.02747252747253" height="164.83516483516482"/><rect class="room-boundary" x="135.98901098901098" y="29.80219780219784" width="160.02747252747253" height="164.83516483516482"/><rect class="room-boundary" x="550.8241758241758" y="432.96153846153845" width="192.9945054945055" height="85.85164835164835"/><rect class="room-boundary" x="622.9395604395604" y="329.2527472527472" width="120.87912087912088" height="89.97252747252747"/><rect class="room-boundary" x="306.31868131868134" y="158.23626373626377" width="63.18681318681319" height="61.81318681318682"/><rect class="room-boundary" x="306.31868131868134" y="59.335164835164846" width="63.18681318681319" height="87.91208791208791"/><rect class="room-boundary" x="550.8241758241758" y="59.335164835164846" width="61.12637362637363" height="87.91208791208791"/><rect class="room-boundary" x="550.1373626373626" y="373.8956043956044" width="61.81318681318682" height="43.956043956043956"/></g><g><polyline class="route" points="181.3186813186813,265.3791208791209 368.81868131868134,265.3791208791209 368.81868131868134,388.66208791208794"/><polyline class="route" points="181.3186813186813,265.3791208791209 403.8461538461538,265.3791208791209 403.8461538461538,353.63461538461536"/><polyline class="route" points="181.3186813186813,265.3791208791209 386.3324175824176,265.3791208791209 386.3324175824176,371.14835164835165"/><polyline class="route" points="181.3186813186813,265.3791208791209 181.3186813186813,490.65384615384613"/><polyline class="route" points="181.3186813186813,265.3791208791209 205.35714285714286,265.3791208791209 205.35714285714286,490.65384615384613"/><polyline class="route" points="181.3186813186813,265.3791208791209 591.3461538461538,265.3791208791209 591.3461538461538,371.14835164835165"/><polyline class="route" points="181.3186813186813,265.3791208791209 386.3324175824176,265.3791208791209 386.3324175824176,251.64285714285717"/><polyline class="route" points="181.3186813186813,265.3791208791209 434.40934065934067,265.3791208791209 434.40934065934067,251.64285714285717"/><polyline class="route" points="181.3186813186813,265.3791208791209 351.30494505494505,265.3791208791209 351.30494505494505,490.65384615384613"/><polyline class="route" points="181.3186813186813,265.3791208791209 421.3598901098901,265.3791208791209 421.3598901098901,490.65384615384613"/><polyline class="route" points="181.3186813186813,265.3791208791209 181.3186813186813,371.14835164835165"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 647.3214285714287,248.89560439560444 647.3214285714287,148.27747252747253"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 647.3214285714287,248.89560439560444 647.3214285714287,172.31593406593407"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 571.4285714285714,248.89560439560444 571.4285714285714,246.14835164835165"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 723.2142857142857,248.89560439560444 723.2142857142857,148.27747252747253"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 571.4285714285714,248.89560439560444 571.4285714285714,148.27747252747253"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 647.3214285714287,248.89560439560444 647.3214285714287,50.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 647.3214285714287,248.89560439560444 647.3214285714287,246.14835164835165"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 459.8214285714286,112.2197802197802"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 459.8214285714286,112.2197802197802 459.8214285714286,49.03296703296701"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 399.0384615384615,112.2197802197802 399.0384615384615,174.032967032967"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 439.83516483516485,112.2197802197802 439.83516483516485,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 479.8763736263736,112.2197802197802 479.8763736263736,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 520.6043956043956,112.2197802197802"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 435.782967032967,112.2197802197802 435.782967032967,49.03296703296701"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 459.8901098901099,112.2197802197802 459.8901098901099,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 550.8241758241758,248.89560439560444 550.8241758241758,112.2197802197802 539.8351648351648,112.2197802197802 399.0384615384615,112.2197802197802 399.0384615384615,128.7032967032967"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 216.00274725274724,176.43681318681325 216.00274725274724,112.2197802197802"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 216.00274725274724,176.43681318681325 216.00274725274724,49.03296703296701"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 155.2197802197802,176.43681318681325 155.2197802197802,174.032967032967"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 196.01648351648353,176.43681318681325 196.01648351648353,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 236.0576923076923,176.43681318681325 236.0576923076923,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 276.7857142857143,176.43681318681325 276.7857142857143,112.2197802197802"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 240.0412087912088,176.43681318681325 240.0412087912088,49.03296703296701"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 216.07142857142856,176.43681318681325 216.07142857142856,175.4065934065934"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 306.31868131868134,220.04945054945057 306.31868131868134,176.43681318681325 296.01648351648356,176.43681318681325 155.2197802197802,176.43681318681325 155.2197802197802,128.7032967032967"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 647.3214285714287,472.1098901098901 647.3214285714287,475.8873626373626"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 647.3214285714287,472.1098901098901 647.3214285714287,443.2637362637363"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 571.4285714285714,472.1098901098901 571.4285714285714,508.510989010989"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 607.6236263736264,472.1098901098901 607.6236263736264,508.510989010989"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 629.1208791208792,472.1098901098901 629.1208791208792,508.510989010989"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 733.5164835164835,472.1098901098901 733.5164835164835,475.8873626373626"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 628.434065934066,472.1098901098901 628.434065934066,443.2637362637363"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 656.1126373626374,472.1098901098901 656.1126373626374,508.510989010989"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,472.1098901098901 561.1263736263736,472.1098901098901 561.1263736263736,484.4725274725275"/><polyline class="route" points="181.3186813186813,265.3791208791209 611.9505494505495,265.3791208791209 611.9505494505495,374.239010989011 622.9395604395604,374.239010989011 683.3791208791208,374.239010989011 683.3791208791208,374.23901098901104"/><polyline class="route" points="181.3186813186813,265.3791208791209 611.9505494505495,265.3791208791209 611.9505494505495,374.239010989011 622.9395604395604,374.239010989011 683.3791208791208,374.239010989011 683.3791208791208,340.0357142857143"/><polyline class="route" points="181.3186813186813,265.3791208791209 611.9505494505495,265.3791208791209 611.9505494505495,374.239010989011 622.9395604395604,374.239010989011 633.7225274725275,374.239010989011 633.7225274725275,374.23901098901104"/><polyline class="route" points="181.3186813186813,265.3791208791209 611.9505494505495,265.3791208791209 611.9505494505495,374.239010989011 622.9395604395604,374.239010989011 733.0357142857143,374.239010989011 733.0357142857143,347.24725274725273"/><polyline class="route" points="181.3186813186813,265.3791208791209 611.9505494505495,265.3791208791209 611.9505494505495,374.239010989011 622.9395604395604,374.239010989011 683.3791208791208,374.239010989011 683.3791208791208,408.4423076923077"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,189.14285714285717"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,166.478021978022"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 314.5604395604396,220.04945054945057 314.5604395604396,189.14285714285717"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 361.26373626373623,220.04945054945057 361.26373626373623,170.59890109890108"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,211.80769230769232"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,158.23626373626377 337.9120879120879,147.24725274725273 337.9120879120879,103.29120879120882"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,158.23626373626377 337.9120879120879,147.24725274725273 337.9120879120879,67.5769230769231"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,158.23626373626377 337.9120879120879,147.24725274725273 314.5604395604396,147.24725274725273 314.5604395604396,103.29120879120882"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,158.23626373626377 337.9120879120879,147.24725274725273 361.26373626373623,147.24725274725273 361.26373626373623,76.91758241758242"/><polyline class="route" points="181.3186813186813,265.3791208791209 337.9120879120879,265.3791208791209 337.9120879120879,231.0384615384615 337.9120879120879,220.04945054945057 337.9120879120879,158.23626373626377 337.9120879120879,147.24725274725273 337.9120879120879,139.00549450549448"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 581.3873626373626,103.29120879120876 581.3873626373626,103.29120879120882"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 581.3873626373626,103.29120879120876 581.3873626373626,67.5769230769231"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 581.3873626373626,103.29120879120876 559.0659340659341,103.29120879120876 559.0659340659341,103.29120879120882"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 581.3873626373626,103.29120879120876 603.7087912087911,103.29120879120876 603.7087912087911,76.91758241758242"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.3873626373626,265.3791208791209 581.3873626373626,248.89560439560444 581.3873626373626,103.29120879120876 581.3873626373626,139.00549450549448"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.0439560439561,265.3791208791209 581.0439560439561,395.8736263736264"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.0439560439561,265.3791208791209 581.0439560439561,395.8736263736264 581.0439560439561,382.1373626373626"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.0439560439561,265.3791208791209 581.0439560439561,395.8736263736264 558.3791208791209,395.8736263736264"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.0439560439561,265.3791208791209 581.0439560439561,395.8736263736264 603.7087912087911,395.8736263736264 603.7087912087911,382.6868131868132"/><polyline class="route" points="181.3186813186813,265.3791208791209 581.0439560439561,265.3791208791209 581.0439560439561,395.8736263736264 581.0439560439561,409.6098901098901"/></g><g><g class="component" data-component-id="db_main" transform="translate(181.3186813186813 265.3791208791209)" style="color:#b86351" role="button" tabindex="0" aria-label="Distribution Board in Building"><title>Distribution Board · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><rect class="glyph" x="-8" y="-8" width="16" height="16" rx="2"/><text class="component-label" y="3">D</text></g><g class="component selected" data-component-id="room_1_ceiling_light_0" transform="translate(368.81868131868134 388.66208791208794)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Living"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_1_ceiling_light_1" transform="translate(403.8461538461538 353.63461538461536)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Living"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_1_ceiling_fan_0" transform="translate(386.3324175824176 371.14835164835165)" style="color:#408570" role="button" tabindex="0" aria-label="Ceiling Fan in Living"><title>Ceiling Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">F</text></g><g class="component" data-component-id="room_1_switch_1way_0" transform="translate(181.3186813186813 490.65384615384613)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Living"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_1_switch_2way_0" transform="translate(205.35714285714286 490.65384615384613)" style="color:#407994" role="button" tabindex="0" aria-label="2-Way Switch in Living"><title>2-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_1_tv_point_0" transform="translate(591.3461538461538 371.14835164835165)" style="color:#407994" role="button" tabindex="0" aria-label="TV Point in Living"><title>TV Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">T</text></g><g class="component" data-component-id="room_1_wifi_point_0" transform="translate(386.3324175824176 251.64285714285717)" style="color:#407994" role="button" tabindex="0" aria-label="Wi-Fi / Router Point in Living"><title>Wi-Fi / Router Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">W</text></g><g class="component" data-component-id="room_1_ac_point_0" transform="translate(434.40934065934067 251.64285714285717)" style="color:#408570" role="button" tabindex="0" aria-label="AC Power Point in Living"><title>AC Power Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">A</text></g><g class="component" data-component-id="room_1_outlet_5pin_0" transform="translate(351.30494505494505 490.65384615384613)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Living"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_1_outlet_5pin_1" transform="translate(421.3598901098901 490.65384615384613)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Living"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_1_outlet_2pin_0" transform="translate(181.3186813186813 371.14835164835165)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Living"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_2_ceiling_light_0" transform="translate(647.3214285714287 148.27747252747253)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bedroom"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_2_ceiling_fan_0" transform="translate(647.3214285714287 172.31593406593407)" style="color:#408570" role="button" tabindex="0" aria-label="Ceiling Fan in Bedroom"><title>Ceiling Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">F</text></g><g class="component" data-component-id="room_2_switch_1way_0" transform="translate(571.4285714285714 246.14835164835165)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bedroom"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_2_outlet_5pin_0" transform="translate(723.2142857142857 148.27747252747253)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Bedroom"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_2_outlet_5pin_1" transform="translate(571.4285714285714 148.27747252747253)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Bedroom"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_2_ac_point_0" transform="translate(647.3214285714287 50.4065934065934)" style="color:#408570" role="button" tabindex="0" aria-label="AC Power Point in Bedroom"><title>AC Power Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">A</text></g><g class="component" data-component-id="room_2_outlet_2pin_0" transform="translate(647.3214285714287 246.14835164835165)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bedroom"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_ceiling_light_0" transform="translate(459.8214285714286 112.2197802197802)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Kitchen 1"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_3_exhaust_fan_0" transform="translate(459.8214285714286 49.03296703296701)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Kitchen 1"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_3_switch_1way_0" transform="translate(399.0384615384615 174.032967032967)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Kitchen 1"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_3_outlet_5pin_0" transform="translate(439.83516483516485 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 1"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_outlet_5pin_1" transform="translate(479.8763736263736 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 1"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_fridge_point_0" transform="translate(520.6043956043956 112.2197802197802)" style="color:#b86351" role="button" tabindex="0" aria-label="Refrigerator Point in Kitchen 1"><title>Refrigerator Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_chimney_point_0" transform="translate(435.782967032967 49.03296703296701)" style="color:#b86351" role="button" tabindex="0" aria-label="Chimney Point in Kitchen 1"><title>Chimney Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_microwave_point_0" transform="translate(459.8901098901099 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="Microwave Point in Kitchen 1"><title>Microwave Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_3_ro_point_0" transform="translate(399.0384615384615 128.7032967032967)" style="color:#b86351" role="button" tabindex="0" aria-label="RO / Purifier Point in Kitchen 1"><title>RO / Purifier Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_ceiling_light_0" transform="translate(216.00274725274724 112.2197802197802)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Kitchen 2"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_4_exhaust_fan_0" transform="translate(216.00274725274724 49.03296703296701)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Kitchen 2"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_4_switch_1way_0" transform="translate(155.2197802197802 174.032967032967)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Kitchen 2"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_4_outlet_5pin_0" transform="translate(196.01648351648353 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 2"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_outlet_5pin_1" transform="translate(236.0576923076923 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 2"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_fridge_point_0" transform="translate(276.7857142857143 112.2197802197802)" style="color:#b86351" role="button" tabindex="0" aria-label="Refrigerator Point in Kitchen 2"><title>Refrigerator Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_chimney_point_0" transform="translate(240.0412087912088 49.03296703296701)" style="color:#b86351" role="button" tabindex="0" aria-label="Chimney Point in Kitchen 2"><title>Chimney Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_microwave_point_0" transform="translate(216.07142857142856 175.4065934065934)" style="color:#b86351" role="button" tabindex="0" aria-label="Microwave Point in Kitchen 2"><title>Microwave Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_4_ro_point_0" transform="translate(155.2197802197802 128.7032967032967)" style="color:#b86351" role="button" tabindex="0" aria-label="RO / Purifier Point in Kitchen 2"><title>RO / Purifier Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_ceiling_light_0" transform="translate(647.3214285714287 475.8873626373626)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Kitchen 3"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_5_exhaust_fan_0" transform="translate(647.3214285714287 443.2637362637363)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Kitchen 3"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_5_switch_1way_0" transform="translate(571.4285714285714 508.510989010989)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Kitchen 3"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_5_outlet_5pin_0" transform="translate(607.6236263736264 508.510989010989)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 3"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_outlet_5pin_1" transform="translate(629.1208791208792 508.510989010989)" style="color:#b86351" role="button" tabindex="0" aria-label="5-Pin Socket (15A) in Kitchen 3"><title>5-Pin Socket (15A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_fridge_point_0" transform="translate(733.5164835164835 475.8873626373626)" style="color:#b86351" role="button" tabindex="0" aria-label="Refrigerator Point in Kitchen 3"><title>Refrigerator Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_chimney_point_0" transform="translate(628.434065934066 443.2637362637363)" style="color:#b86351" role="button" tabindex="0" aria-label="Chimney Point in Kitchen 3"><title>Chimney Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_microwave_point_0" transform="translate(656.1126373626374 508.510989010989)" style="color:#b86351" role="button" tabindex="0" aria-label="Microwave Point in Kitchen 3"><title>Microwave Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_5_ro_point_0" transform="translate(561.1263736263736 484.4725274725275)" style="color:#b86351" role="button" tabindex="0" aria-label="RO / Purifier Point in Kitchen 3"><title>RO / Purifier Point · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_6_ceiling_light_0" transform="translate(683.3791208791208 374.23901098901104)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bathroom 1"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_6_exhaust_fan_0" transform="translate(683.3791208791208 340.0357142857143)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Bathroom 1"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_6_switch_1way_0" transform="translate(633.7225274725275 374.23901098901104)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bathroom 1"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_6_geyser_point_0" transform="translate(733.0357142857143 347.24725274725273)" style="color:#66786c" role="button" tabindex="0" aria-label="Geyser / Water Heater in Bathroom 1"><title>Geyser / Water Heater · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">G</text></g><g class="component" data-component-id="room_6_outlet_2pin_0" transform="translate(683.3791208791208 408.4423076923077)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bathroom 1"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_7_ceiling_light_0" transform="translate(337.9120879120879 189.14285714285717)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bathroom 2"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_7_exhaust_fan_0" transform="translate(337.9120879120879 166.478021978022)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Bathroom 2"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_7_switch_1way_0" transform="translate(314.5604395604396 189.14285714285717)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bathroom 2"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_7_geyser_point_0" transform="translate(361.26373626373623 170.59890109890108)" style="color:#66786c" role="button" tabindex="0" aria-label="Geyser / Water Heater in Bathroom 2"><title>Geyser / Water Heater · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">G</text></g><g class="component" data-component-id="room_7_outlet_2pin_0" transform="translate(337.9120879120879 211.80769230769232)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bathroom 2"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_8_ceiling_light_0" transform="translate(337.9120879120879 103.29120879120882)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bathroom 3"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_8_exhaust_fan_0" transform="translate(337.9120879120879 67.5769230769231)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Bathroom 3"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_8_switch_1way_0" transform="translate(314.5604395604396 103.29120879120882)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bathroom 3"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_8_geyser_point_0" transform="translate(361.26373626373623 76.91758241758242)" style="color:#66786c" role="button" tabindex="0" aria-label="Geyser / Water Heater in Bathroom 3"><title>Geyser / Water Heater · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">G</text></g><g class="component" data-component-id="room_8_outlet_2pin_0" transform="translate(337.9120879120879 139.00549450549448)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bathroom 3"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_9_ceiling_light_0" transform="translate(581.3873626373626 103.29120879120882)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bathroom 4"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_9_exhaust_fan_0" transform="translate(581.3873626373626 67.5769230769231)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Bathroom 4"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_9_switch_1way_0" transform="translate(559.0659340659341 103.29120879120882)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bathroom 4"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_9_geyser_point_0" transform="translate(603.7087912087911 76.91758241758242)" style="color:#66786c" role="button" tabindex="0" aria-label="Geyser / Water Heater in Bathroom 4"><title>Geyser / Water Heater · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">G</text></g><g class="component" data-component-id="room_9_outlet_2pin_0" transform="translate(581.3873626373626 139.00549450549448)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bathroom 4"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g><g class="component" data-component-id="room_10_ceiling_light_0" transform="translate(581.0439560439561 395.8736263736264)" style="color:#a67921" role="button" tabindex="0" aria-label="Ceiling Light in Bathroom 5"><title>Ceiling Light · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">L</text></g><g class="component" data-component-id="room_10_exhaust_fan_0" transform="translate(581.0439560439561 382.1373626373626)" style="color:#408570" role="button" tabindex="0" aria-label="Exhaust Fan in Bathroom 5"><title>Exhaust Fan · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">E</text></g><g class="component" data-component-id="room_10_switch_1way_0" transform="translate(558.3791208791209 395.8736263736264)" style="color:#407994" role="button" tabindex="0" aria-label="1-Way Switch in Bathroom 5"><title>1-Way Switch · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">S</text></g><g class="component" data-component-id="room_10_geyser_point_0" transform="translate(603.7087912087911 382.6868131868132)" style="color:#66786c" role="button" tabindex="0" aria-label="Geyser / Water Heater in Bathroom 5"><title>Geyser / Water Heater · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">G</text></g><g class="component" data-component-id="room_10_outlet_2pin_0" transform="translate(581.0439560439561 409.6098901098901)" style="color:#b86351" role="button" tabindex="0" aria-label="2-Pin Socket (5A) in Bathroom 5"><title>2-Pin Socket (5A) · drag to move</title><circle class="hit-area" r="12"/><circle class="selection-ring" r="12"/><circle class="glyph" r="6"/><text class="component-label" y="3">O</text></g></g></g></svg>
+          </main>
+          <div class="editor-legend"><span><i class="light-key"></i>Lights</span><span><i class="switch-key"></i>Switches</span><span><i class="socket-key"></i>Sockets</span><span><i class="fan-key"></i>Fans</span><span class="editor-scale-note">Positions in metres</span></div>
+        </div>
+        <aside class="editor-inspector" aria-label="Selection and quantities">
+          <div class="editor-properties"><h3>Light</h3><p>Living</p><p class="selection-position">Position: 5.37, 2.81 m</p><button disabled tabindex="-1" class="editor-button editor-delete" id="editor-delete" >Delete item</button><details class="editor-advanced" id="editor-advanced" ><summary>Advanced details</summary><dl><dt>Component ID</dt><dd>room_1_ceiling_light_0</dd><dt>Room ID</dt><dd>room_1</dd><dt>Source</dt><dd>generated</dd><dt>Placement</dt><dd>validated_room_local</dd><dt>Revision</dt><dd>10</dd></dl></details></div>
+          <div class="editor-boq"><h3>Quantities <span>Live BOQ</span></h3><div class="boq-summary"><div><strong data-quantity="lights">11</strong><span>Lights</span></div><div><strong data-quantity="fans">2</strong><span>Fans</span></div><div><strong data-quantity="switches">11</strong><span>Switches</span></div><div><strong data-quantity="sockets">17</strong><span>Sockets</span></div></div><div class="editor-wire"><span>Estimated wire</span><strong data-wire-total>595.39 <small>m</small></strong></div><details class="boq-details" id="editor-full-boq" ><summary>View full BOQ</summary><div><table><thead><tr><th>Item</th><th>Qty</th><th>Unit</th></tr></thead><tbody><tr><td>Distribution Board</td><td>1</td><td>pcs</td></tr><tr><td>Ceiling Light</td><td>11</td><td>pcs</td></tr><tr><td>Ceiling Fan</td><td>2</td><td>pcs</td></tr><tr><td>1-Way Switch</td><td>10</td><td>pcs</td></tr><tr><td>2-Way Switch</td><td>1</td><td>pcs</td></tr><tr><td>TV Point</td><td>1</td><td>pcs</td></tr><tr><td>Wi-Fi / Router Point</td><td>1</td><td>pcs</td></tr><tr><td>AC Power Point</td><td>2</td><td>pcs</td></tr><tr><td>5-Pin Socket (15A)</td><td>10</td><td>pcs</td></tr><tr><td>2-Pin Socket (5A)</td><td>7</td><td>pcs</td></tr><tr><td>Exhaust Fan</td><td>8</td><td>pcs</td></tr><tr><td>Refrigerator Point</td><td>3</td><td>pcs</td></tr><tr><td>Chimney Point</td><td>3</td><td>pcs</td></tr><tr><td>Microwave Point</td><td>3</td><td>pcs</td></tr><tr><td>RO / Purifier Point</td><td>3</td><td>pcs</td></tr><tr><td>Geyser / Water Heater</td><td>5</td><td>pcs</td></tr><tr><td>Electrical Wire / Cable (m)</td><td>595</td><td>metres</td></tr><tr><td>Conduit (m)</td><td>536</td><td>metres</td></tr><tr><td>Cable Clips</td><td>397</td><td>pcs</td></tr><tr><td>Junction / Gang Box</td><td>43</td><td>pcs</td></tr><tr><td>Earthing Wire (m)</td><td>89</td><td>metres</td></tr><tr><td>Screws / Wall Plugs (packs)</td><td>2</td><td>pcs</td></tr></tbody></table></div></details></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let jobId = null, visionData = null;
+
+// FILE INPUT
+const fi = document.getElementById("file-input");
+const dz = document.getElementById("drop-zone");
+const pr = document.getElementById("preview-img");
+const ub = document.getElementById("upload-btn");
+
+fi.addEventListener("change", e => { if(e.target.files[0]) preview(e.target.files[0]); });
+["dragenter","dragover"].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add("drag"); }));
+["dragleave","drop"].forEach(e   => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove("drag"); }));
+dz.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if(f){ fi.files = e.dataTransfer.files; preview(f); }});
+
+function preview(f){
+  pr.src = URL.createObjectURL(f);
+  pr.style.display = "block";
+  ub.disabled = false;
+}
+
+// UPLOAD
+async function uploadPlan(){
+  const f = fi.files[0];
+  if(!f) return;
+  setStatus("upload-status","info","🔍 Analysing floor plan with OpenCV…");
+  ub.disabled = true;
+
+  const fd = new FormData();
+  fd.append("file", f);
+  fd.append("project_type", document.getElementById("project-type").value);
+  const w = document.getElementById("known-width").value;
+  const h = document.getElementById("known-height").value;
+  if(w) fd.append("known_width", w);
+  if(h) fd.append("known_height", h);
+  const projectName = document.getElementById("project-name").value.trim();
+  if(projectName) fd.append("project_name", projectName);
+
+  try {
+    const res  = await fetch("/upload", {method:"POST", body:fd});
+    const data = await res.json();
+
+    if(data.status === "failed"){
+      setStatus("upload-status","error","❌ Analysis failed: " + data.error);
+      ub.disabled = false; return;
+    }
+
+    jobId      = data.job_id;
+    visionData = data.vision_data;
+
+    const nr = data.vision_data.rooms?.length || 0;
+    const ne = data.vision_data.detected_elements?.length || 0;
+    setStatus("upload-status","success",
+      `✅ Detected ${nr} room${nr!==1?"s":""} and ${ne} element${ne!==1?"s":""}. Confidence: ${Math.round((data.vision_data.confidence||0)*100)}%. Verify below.`);
+
+    buildVerify(data.vision_data);
+    show("verify-section");
+    document.getElementById("verify-section").scrollIntoView({behavior:"smooth"});
+  } catch(err){
+    setStatus("upload-status","error","❌ " + err.message);
+    ub.disabled = false;
+  }
+}
+
+// BUILD VERIFICATION UI
+function buildVerify(vd){
+  // Confidence bar
+  if(vd.confidence !== undefined){
+    document.getElementById("conf-block").style.display = "block";
+    const pct = Math.round(vd.confidence * 100);
+    document.getElementById("conf-label").textContent = pct + "%";
+    const fill = document.getElementById("conf-fill");
+    fill.style.width = pct + "%";
+    fill.style.background = pct>=70 ? "var(--green)" : pct>=40 ? "var(--yellow)" : "var(--red)";
+  }
+
+  // Warnings
+  const wl = document.getElementById("warnings-list");
+  wl.innerHTML = "";
+  (vd.warnings||[]).forEach(w => {
+    const d = document.createElement("div");
+    d.className = "warn"; d.textContent = "⚠ " + w;
+    wl.appendChild(d);
+  });
+
+  // Debug info
+  if(vd._debug){
+    document.getElementById("debug-info").innerHTML =
+      `<div class="debug-box">OpenCV debug — image: ${vd._debug.image_px}  ·  scale: ${vd._debug.scale_mppx} m/px  ·  rooms found: ${vd._debug.rooms_found}</div>`;
+  }
+
+  buildOpeningCandidates(vd.opening_candidates || []);
+
+  // Rooms editor
+  const re = document.getElementById("rooms-editor");
+  re.innerHTML = `<div class="section-title">Detected Rooms (${(vd.rooms||[]).length}) — Edit if wrong</div>`;
+
+  const ROOM_TYPES = ["bedroom","living","kitchen","bathroom","office","store","corridor","hall","unknown"];
+
+  (vd.rooms||[]).forEach((room, i) => {
+    const card = document.createElement("div");
+    card.className = "room-card";
+    card.dataset.idx = i;
+
+    const typeOpts = ROOM_TYPES.map(t =>
+      `<option value="${t}" ${room.name===t?"selected":""}>${t}</option>`).join("");
+
+    card.innerHTML = `
+      <h4>Room ${i+1}</h4>
+      <div class="room-fields">
+        <div><label>Room Type</label>
+          <select data-field="name" style="margin-top:2px;padding:5px 8px;font-size:12px;width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px">${typeOpts}</select></div>
+        <div><label>Width (m)</label><input type="number" data-field="width"  value="${(room.width ||0).toFixed(1)}" step="0.1" min="0.5"></div>
+        <div><label>Height (m)</label><input type="number" data-field="height" value="${(room.height||0).toFixed(1)}" step="0.1" min="0.5"></div>
+        <div><label>Doors detected</label><input type="number" data-field="door_count" value="${(room.doors||[]).length}" min="0" max="4"></div>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Area: ${room.area_m2||"?"}m²  ·  Position: (${(room.x||0).toFixed(1)}, ${(room.y||0).toFixed(1)})  ·  Windows: ${(room.windows||[]).length}
+      </div>`;
+    re.appendChild(card);
+  });
+
+  // Elements
+  const elems = vd.detected_elements||[];
+  if(elems.length){
+    const counts = {};
+    elems.forEach(e => counts[e.type] = (counts[e.type]||0)+1);
+    const summary = Object.entries(counts).map(([k,v])=>`${v}× ${k}`).join(", ");
+    const d = document.createElement("div");
+    d.style.cssText = "margin-top:14px;padding:10px 14px;background:rgba(26,133,255,.08);border-radius:6px;font-size:12px;color:var(--muted)";
+    d.innerHTML = `<strong style="color:var(--accent)">Elements detected:</strong> ${summary}`;
+    re.appendChild(d);
+  }
+}
+
+
+function buildOpeningCandidates(candidates){
+  const host = document.getElementById("opening-candidates");
+  if(!candidates.length){
+    host.innerHTML = '<div class="section-title">Architectural openings</div><p class="muted" style="font-size:12px;margin-bottom:12px">No opening candidates detected. Existing legacy doors/windows remain unchanged.</p>';
+    return;
+  }
+  const card = c => '<div class="room-card opening-card" data-opening-id="' + c.id + '">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h4 style="margin:0">' + c.type.toUpperCase() + ' · ' + c.room_id + '</h4>' +
+    '<span class="qty" style="background:' + (c.confidence >= .7 ? 'var(--green)' : 'var(--yellow)') + '">' + Math.round(c.confidence * 100) + '%</span></div>' +
+    '<div class="room-fields" style="margin-top:8px"><div><label>Wall</label><select data-opening-field="side"><option value="top">top</option><option value="bottom">bottom</option><option value="left">left</option><option value="right">right</option></select></div>' +
+    '<div><label>Width (px)</label><input type="number" min="1" data-opening-field="width_px" value="' + c.width_px + '"></div>' +
+    '<div><label>Offset (px)</label><input type="number" min="0" data-opening-field="offset_px" value="' + c.offset_px + '"></div>' +
+    '<div><label>Verification</label><select data-opening-field="verification_status"><option value="pending">PENDING</option><option value="accepted">ACCEPT</option><option value="rejected">REJECT</option></select></div></div>' +
+    '<div style="margin-top:8px;font-size:11px;color:var(--muted)">Method: ' + c.detection_method + ' · Approx. width: ' + c.approx_width_m + 'm · Position: (' + c.position_px.x + ', ' + c.position_px.y + ') px</div></div>';
+  const doors = candidates.filter(c => c.type === "door").map(card).join("");
+  const windows = candidates.filter(c => c.type === "window").map(card).join("");
+  host.innerHTML = '<div class="section-title">Architectural Opening Candidates — verify before use</div>' +
+    '<p class="muted" style="font-size:12px;margin-bottom:10px">Only ACCEPTED candidates are adapted into the legacy electrical workflow. Pending and rejected candidates do not change it.</p>' +
+    '<div class="section-title">Doors (' + candidates.filter(c => c.type === "door").length + ')</div>' + doors +
+    '<div class="section-title">Windows (' + candidates.filter(c => c.type === "window").length + ')</div>' + windows;
+  candidates.forEach(c => {
+    const cardEl = host.querySelector('[data-opening-id="' + c.id + '"]');
+    if(!cardEl) return;
+    cardEl.querySelector('[data-opening-field="side"]').value = c.side;
+    cardEl.querySelector('[data-opening-field="verification_status"]').value = c.verification_status || "pending";
+  });
+}
+
+// COLLECT VERIFIED DATA
+function collectVerified(){
+  const vd = JSON.parse(JSON.stringify(visionData));
+  document.querySelectorAll(".room-card").forEach((card, i) => {
+    if(!vd.rooms[i]) return;
+    const name  = card.querySelector('[data-field="name"]')?.value;
+    const w     = parseFloat(card.querySelector('[data-field="width"]')?.value);
+    const h     = parseFloat(card.querySelector('[data-field="height"]')?.value);
+    const doors = parseInt(card.querySelector('[data-field="door_count"]')?.value)||0;
+    if(name) vd.rooms[i].name = name;
+    if(!isNaN(w)) vd.rooms[i].width  = w;
+    if(!isNaN(h)) vd.rooms[i].height = h;
+    // Rebuild doors array to match count
+    if(doors === 0) vd.rooms[i].doors = [];
+    else if(vd.rooms[i].doors.length === 0 && doors > 0){
+      vd.rooms[i].doors = [{wall:"bottom", position: vd.rooms[i].width/2, width:0.9}];
+    }
+  });
+
+  document.querySelectorAll(".opening-card").forEach(card => {
+    const candidate = (vd.opening_candidates || []).find(c => c.id === card.dataset.openingId);
+    if(!candidate) return;
+    candidate.side = card.querySelector('[data-opening-field="side"]').value;
+    candidate.wall_location = candidate.side;
+    candidate.width_px = parseFloat(card.querySelector('[data-opening-field="width_px"]').value) || candidate.width_px;
+    candidate.offset_px = parseFloat(card.querySelector('[data-opening-field="offset_px"]').value) || candidate.offset_px;
+    candidate.verification_status = card.querySelector('[data-opening-field="verification_status"]').value;
+  });
+  return vd;
+}
+
+// GENERATE LAYOUT
+async function generateLayout(){
+  const vb = document.getElementById("verify-btn");
+  vb.disabled = true;
+  setStatus("verify-status","info","⚙️ Placing components, routing wire, building BOM…");
+
+  try {
+    const res  = await fetch(`/verify/${jobId}`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(collectVerified()),
+    });
+    const data = await res.json();
+
+    if(data.status !== "completed"){
+      setStatus("verify-status","error","❌ " + JSON.stringify(data));
+      vb.disabled = false; return;
+    }
+
+    setStatus("verify-status","success","✅ Layout generated!");
+    buildResults(data);
+    show("results-section");
+    document.getElementById("results-section").scrollIntoView({behavior:"smooth"});
+  } catch(err){
+    setStatus("verify-status","error","❌ " + err.message);
+    vb.disabled = false;
+  }
+}
+
+// BUILD RESULTS
+function buildResults(data){
+  const s = data.summary;
+  document.getElementById("summary-chips").innerHTML = `
+    <span class="chip chip-b">🏠 ${s.rooms} rooms</span>
+    <span class="chip chip-g">⚡ ${s.components} components</span>
+    <span class="chip chip-y">🔌 ${s.total_wire_m}m wire</span>
+    ${s.cameras>0?`<span class="chip chip-b">📷 ${s.cameras} cameras</span>`:""}
+    ${s.cameras>0?`<span class="chip chip-y">🔗 ${s.total_cat6_m}m CAT6</span>`:""}`;
+
+  document.getElementById("layout-img").src = data.layout_url + "?t=" + Date.now();
+
+  const rows = data.bom.map(it=>`<tr>
+    <td>${it.item}</td>
+    <td><span class="qty">${it.qty}</span></td>
+    <td style="color:var(--muted)">${it.unit}</td></tr>`).join("");
+  document.getElementById("bom-table").innerHTML =
+    `<table><thead><tr><th>Item</th><th>Qty</th><th>Unit</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function downloadLayout(){
+  if(!jobId) return;
+  const a = document.createElement("a");
+  a.href = `/outputs/${jobId}_layout.png`;
+  a.download = `layout_${jobId}.png`;
+  a.click();
+}
+
+function show(id){ document.getElementById(id).style.display="block"; }
+
+function setStatus(id, type, msg){
+  const el = document.getElementById(id);
+  el.className = "status-bar " + type;
+  el.innerHTML = (type==="info"?'<div class="spinner"></div>':"") + `<span>${msg}</span>`;
+}
+</script>
+<script src="/static/editor.js"></script>
+</body>
+</html></body></html>

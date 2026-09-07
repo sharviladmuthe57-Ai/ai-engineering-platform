@@ -329,3 +329,66 @@ Existing upload, verification, generation, status, PNG, and BOM endpoints remain
 - If a future feature would benefit from paid infrastructure, preserve a local/free core path where practical and label the alternative **FUTURE / OPTIONAL / REQUIRES COST APPROVAL**. Do not activate it without explicit approval.
 
 The current application complies: FastAPI, OpenCV, NumPy, local geometry/rules, SVG/DOM UI, and local JSON job persistence provide the complete current demo without external paid services.
+
+## 24. Product website and editor UX refinement
+
+**2026-09-07.** Frontend-only refinement preserves the frozen engineering
+pipeline and all 49 tracked backend tests. No backend algorithms, job schema,
+engineering rules, dependencies, paid services, or cloud resources changed.
+
+- Removed the small hero prototype card. Kept the cinematic imagery, large
+  headline, rounded navigation, cyan accent, and visible contact email.
+- Repaired sticky-section ancestry and replaced the cinematic playback logic:
+  only the current video plays, adjacent videos use metadata preloading, distant
+  videos are unmounted, and off-screen/hidden-tab playback pauses. Local WebP
+  posters cover unavailable playback and reduced-motion presentation.
+- Kept the aligned 2D input/understanding/structured-plan story; added an actual
+  structured electrical placement/routes/BOQ chapter and a read-only export of
+  the real editor. Export data is allowlisted and contains no local paths.
+- Added three optimized supplied references in a single pinned Vision / Next
+  frame: reversible opacity, clip-path, and 2.5% scale transitions. No Three.js,
+  WebGL, or new rendering engine. All three references total about 846 KB.
+  Each frame says they are supplied visual references, not product output.
+- Touch and reduced-motion modes use native image styles with stage buttons,
+  avoiding scroll MotionValue ownership of manually selected image styles.
+- The actual editor now uses the same paper/graphite/teal visual language, a
+  large fitted paper canvas, compact four-tool Add palette, one-line usage hint,
+  clear selection/drag halos, and valid/invalid placement feedback. Internal
+  IDs and provenance remain in state and are available in Advanced details.
+- BOQ leads with live light/fan/switch/socket counts and wire length, with the
+  full table under View full BOQ. Save is primary and reports Saved; Reset is
+  secondary and retains confirmation. Existing API operations are unchanged.
+
+### Verification evidence
+
+- In the real browser, a disposable copy of the existing plan-01 job was used;
+  the original job was not edited. Moving `room_1_ceiling_light_0` to 5.70,
+  2.94 m changed its route and wire total from 595.39 to 595.61 m. Save reported
+  success; reload retained that ID and translated position.
+- Added one light, fan, switch, and socket through the visible toolbar/canvas:
+  71 to 75 components; summary 11/2/11/17 to 12/3/12/18; wire 610.53 m.
+  Deleting the added socket returned 74 components and 605.72 m. Reset restored
+  71 components and 595.39 m. Fit restored the identity camera transform;
+  View toggled 10 room boundaries; full BOQ expansion worked. No editor console
+  errors were observed.
+- Desktop 1440x900 and laptop 1366x768: hero, real aligned 2D frames, editor
+  export, all three 3D images and backward stage 3 to 2 to 1 inspected. Sticky
+  frame top stayed at 0; no horizontal overflow. Only one cinematic video
+  played; zero played in the vision chapter. Mobile 390x844 QA caught and fixed
+  a missing headline line break and stale manually selected image styles.
+  The final production version was retested: mobile 3D opacities select only
+  the requested image and 2D clip masks reverse correctly. The readable mobile
+  editor export uses a 1100px frame to include the whole BOQ, without scaling
+  the desktop UI into tiny text.
+- Existing tracked backend suite: 49 tests passed, unchanged coverage.
+  Production build passed, including TypeScript checking and static prerendering.
+
+### Limits and continuity
+
+The marketing export is not interactive. The working editor is the separate
+local FastAPI app; instructions and URLs are in README. Local previews require
+their server process to remain running and are not a public deployment.
+No formal CPU-throttled i3/4 GB benchmark or OS reduced-motion emulation was
+available; video lifecycle and lightweight rendering were checked directly.
+Room labels still reflect the existing detector's state, not new semantic
+corrections. Interactive 3D is still the next unimplemented milestone.

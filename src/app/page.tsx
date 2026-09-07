@@ -1,23 +1,57 @@
-import { ArrowRight, Check, CircleDotDashed, MousePointer2, Move, PencilRuler, Plus, Route, Sparkles, Trash2 } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { CinematicStory } from "@/components/CinematicStory";
+import { ProductStory } from "@/components/ProductStory";
+import { ElectricalStory } from "@/components/ElectricalStory";
+import { EditorShowcase } from "@/components/EditorShowcase";
+import { VisionStory } from "@/components/VisionStory";
 import { FeedbackForm } from "@/components/FeedbackForm";
 import { Footer } from "@/components/Footer";
 import { Navigation } from "@/components/Navigation";
-import { ProductStory } from "@/components/ProductStory";
 import { Reveal } from "@/components/Reveal";
 import { mailto, siteConfig } from "@/config/site";
 
-const process = [["01", "Read", "Architectural drawing"], ["02", "Understand", "Geometry & openings"], ["03", "Draft", "Electrical design"], ["04", "Review", "Engineer control"], ["05", "Output", "Layout, routing & BOQ"]];
+const process = [
+  ["Read", "Architectural drawing"],
+  ["Understand", "Rooms, openings, geometry"],
+  ["Design", "Electrical first draft"],
+  ["Route", "Architecture-aware wiring"],
+  ["Quantify", "Bill of quantities"],
+  ["Review", "Engineer edits"],
+];
 
-export default function Home() { return <main>
-  <Navigation/><CinematicStory/>
-  <section className="intro section-shell" id="product"><Reveal><p className="section-kicker">PHASE 01 / ELECTRICAL</p></Reveal><Reveal delay={.05}><div className="intro-grid"><h2>FROM ARCHITECTURAL DRAWING<br/><i>TO ENGINEERING FIRST DRAFT.</i></h2><div><p className="body-copy">We are building software that reads an architectural plan, turns its geometry into usable building information, and prepares an electrical first draft for an engineer to review.</p><div className="cta-row"><a className="button button-dark" href="#proof">See the product <ArrowRight/></a><a className="link-arrow" href="#feedback">Share your workflow <ArrowRight/></a></div></div></div></Reveal></section>
-  <section className="proof-section" id="proof"><div className="section-shell proof-heading"><Reveal><p className="section-kicker">REAL PRODUCT EVIDENCE</p><h2>THE DRAWING<br/>BECOMES A MODEL.</h2><p className="body-copy">A real plan moves through the prototype from architectural input to geometry extraction to a structured plan state.</p></Reveal></div><ProductStory/></section>
-  <section className="electrical-section section-shell"><Reveal><div className="section-split"><div><p className="section-kicker">ELECTRICAL DESIGN / CURRENT PROTOTYPE</p><h2>FROM PLAN<br/>TO FIRST DRAFT.</h2></div><p className="body-copy">Structured geometry becomes the foundation for placement, architecture-aware routing, and a bill of quantities. The result remains a first draft for engineering review.</p></div></Reveal><Reveal><figure className="electrical-frame"><div className="frame-bar"><span className="signal"/><span>ACTUAL GENERATED ELECTRICAL LAYOUT</span><span>ROUTING + BOQ</span></div><img src="/product/electrical-routing-boq.png" alt="Actual generated electrical layout with routes, components, and bill of quantities"/><figcaption><span>REAL PROTOTYPE OUTPUT</span><span>Electrical placement · routing · BOQ</span></figcaption></figure></Reveal></section>
-  <section className="control-section"><div className="section-shell control-grid"><Reveal><div><p className="section-kicker">ENGINEER CONTROL / EDITABLE 2D V1</p><h2>AI MAKES THE<br/>FIRST MOVE.<br/><i>ENGINEERS MAKE IT REAL.</i></h2><p className="body-copy">The editable engineering state is built for practical review: components can be selected, moved, added, and deleted. The underlying routes and BOQ stay in sync with the state.</p></div></Reveal><Reveal delay={.1}><div className="control-card"><div className="canvas-head"><span>EDITABLE ELECTRICAL CANVAS</span><span className="live-dot">LIVE STATE</span></div><div className="tool-list"><Tool icon={<MousePointer2/>} verb="SELECT" copy="Inspect a placed component"/><Tool icon={<Move/>} verb="MOVE" copy="Adjust a component in its room"/><Tool icon={<Plus/>} verb="ADD" copy="Add a manual component"/><Tool icon={<Trash2/>} verb="DELETE" copy="Remove an unwanted point"/></div><div className="sync-row"><Route/><div><b>ROUTES + BOQ</b><span>Update with the editable project state</span></div><Check/></div><p className="control-note">Verified locally in the prototype: editable components, route updates, BOQ updates, save and reopen.</p></div></Reveal></div></section>
-  <section className="how-section section-shell" id="approach"><Reveal><p className="section-kicker">HOW IT WORKS</p><h2>UNDERSTAND FIRST.<br/>ENGINEER SECOND.</h2></Reveal><div className="flow-path">{process.map(([number,title,copy],index)=><Reveal delay={index*.06} key={number}><article><span>{number}</span><CircleDotDashed/><h3>{title}</h3><p>{copy}</p>{index<process.length-1&&<i/>}</article></Reveal>)}</div></section>
-  <section className="vision-section" id="vision"><div className="section-shell"><Reveal><p className="section-kicker">THE VISION</p><div className="vision-heading"><h2>ONE BUILDING.<br/>EVERY ENGINEERING SYSTEM.</h2><p className="body-copy">Electrical is where we are starting. Other disciplines are a future direction built on a shared model of the physical world.</p></div></Reveal><Reveal><div className="discipline-stack"><div className="active-discipline"><Sparkles/> ELECTRICAL <span>BUILDING NOW</span></div>{["PLUMBING","HVAC","STRUCTURAL"].map(name=><div key={name}>{name}<span>FUTURE</span></div>)}<div className="model-layer"><PencilRuler/> COORDINATED ENGINEERING MODEL <span>VISION</span></div></div></Reveal></div></section>
-  <section className="discovery-section section-shell" id="feedback"><Reveal><div className="discovery-heading"><p className="section-kicker">WE ARE LISTENING</p><h2>HOW DOES YOUR TEAM<br/>DESIGN TODAY?</h2><p className="body-copy">We are speaking with engineering and construction teams to understand where time is actually lost between receiving plans and delivering engineering designs.</p></div></Reveal><FeedbackForm/></section>
-  <section className="final-section section-shell"><Reveal><p className="section-kicker">OPEN CONVERSATION</p><h2>BUILD THE NEXT<br/>ENGINEERING WORKFLOW<br/><i>WITH US.</i></h2><a className="button button-dark" href={mailto}>Talk to us <ArrowRight/></a><a className="email-link" href={mailto}>{siteConfig.email}</a></Reveal></section><Footer/>
-</main> }
-function Tool({icon,verb,copy}:{icon:React.ReactNode;verb:string;copy:string}){return <div className="tool"><span>{icon}</span><b>{verb}</b><small>{copy}</small></div>}
+export default function Home() {
+  return <main className="site-root">
+    <div className="atmosphere" aria-hidden="true"/>
+    <Navigation/>
+    <CinematicStory/>
+    <div className="bridge section-shell"><p>Drawings already hold the information.<br/><strong>We’re building the tools to put it to work.</strong></p><span>Electrical / Working prototype</span></div>
+    <ProductStory/>
+    <ElectricalStory/>
+    <EditorShowcase/>
+    <VisionStory/>
+
+    <section className="how-section section-shell" id="approach">
+      <Reveal><div className="section-heading"><div><p className="section-kicker">One connected workflow</p><h2>Less redrawing.<br/><em>More engineering.</em></h2></div><p>From architectural input to an editable electrical draft, with the engineer in control.</p></div></Reveal>
+      <div className="process-line">{process.map(([title,description],index) => <Reveal key={title} delay={index * .045}><div className="process-node"><span>0{index+1}</span><h3>{title}</h3><p>{description}</p></div></Reveal>)}</div>
+    </section>
+
+    <section className="vision-section" id="vision">
+      <div className="section-shell vision-grid">
+        <Reveal><div className="vision-copy"><p className="section-kicker">The direction</p><h2>One building.<br/><em>Connected<br/>engineering.</em></h2><p>Electrical comes first. Our longer-term vision is a shared model connecting the systems inside every building.</p></div></Reveal>
+        <Reveal delay={.1}><div className="discipline-rows"><div className="current-discipline"><h3>Electrical</h3><span><i className="status-dot"/> Building now</span></div>{["Plumbing","HVAC","Structural"].map(name => <div key={name}><h3>{name}</h3><span>Future</span></div>)}</div><p className="vision-next">Longer-term vision<strong>A coordinated engineering model</strong>Interactive 3D and other disciplines are not yet implemented.</p></Reveal>
+      </div>
+    </section>
+
+    <section className="discovery-section section-shell" id="feedback">
+      <div className="discovery-grid">
+        <Reveal><div className="discovery-intro"><p className="section-kicker">Build with the people who do the work</p><h2>Your workflow.<br/><em>Our next<br/>conversation.</em></h2><p>We’re speaking with engineering and construction teams. Tell us where the work slows down—and what a useful first draft would need to get right.</p><a href={mailto}>{siteConfig.email}</a></div></Reveal>
+        <FeedbackForm/>
+      </div>
+    </section>
+
+    <section className="final-section section-shell" id="contact">
+      <Reveal><p className="section-kicker">Let’s talk</p><h2>The next engineering<br/>workflow starts<br/><em>with a conversation.</em></h2><a className="email-link" href={mailto}>{siteConfig.email}<ArrowUpRight/></a><div className="cta-row"><a className="button primary" href="#feedback">Share your workflow <ArrowUpRight/></a><a className="button secondary" href={mailto}>Email us <ArrowUpRight/></a></div></Reveal>
+    </section>
+    <Footer/>
+  </main>;
+}
