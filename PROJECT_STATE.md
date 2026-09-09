@@ -392,3 +392,43 @@ No formal CPU-throttled i3/4 GB benchmark or OS reduced-motion emulation was
 available; video lifecycle and lightweight rendering were checked directly.
 Room labels still reflect the existing detector's state, not new semantic
 corrections. Interactive 3D is still the next unimplemented milestone.
+
+## 25. Kairo Labs launch integration
+
+**2026-09-09.** Launch-only changes preserve the website design, seven videos,
+2D/3D storytelling, editor export, and frozen Python engineering backend.
+
+- Centralized brand is now Kairo Labs. Navigation, footer, form label, email
+  subject, browser title, description, Open Graph and Twitter text use it.
+  The visible contact email remains sharviladmuthe57@gmail.com.
+- The form calls the new Next.js `POST /api/feedback` handler. It validates and
+  trims the existing eleven fields, checks a honeypot/origin/body limits, then
+  sends only allowlisted fields to Google Apps Script using server-only URL and
+  shared-secret environment configuration. No local response files or paid
+  services are introduced. Success requires a matching storage receipt.
+- `scripts/google-apps-script.gs` provides owner-run setup and an authenticated
+  append endpoint. Rows include timestamp, all answers, source page, and a
+  random submission ID. A script lock plus ID lookup prevents duplicate retries;
+  formula-looking text is escaped and unexpected column order fails closed.
+- Beginner setup and Excel-export instructions are in
+  `docs/google-sheets-form-setup.md`. Intended workbook: **Kairo Labs Leads**,
+  tab: **Responses**. No real Google sheet/deployment/environment values have
+  been configured yet; production storage is not claimed as working.
+- User explicitly approved **Netlify Free** after Vercel Hobby's non-commercial
+  restriction was identified. `netlify.toml` sets the root Next.js build,
+  `.next` output and Node 24; Netlify's automatic adapter handles the API route.
+  No dependencies or lockfile versions changed. `.netlify` output is ignored.
+- Production Next.js build passed including TypeScript and API route output.
+  All **49 unchanged backend tests** and **24 website integration tests** passed.
+  Mocked tests run the actual Apps Script code: mapped columns, timestamp,
+  one-row retries, failed writes, locks, invalid input, missing config, failed
+  receipts, and formula escaping. These do not prove a real Google row exists.
+- Local production browser check confirmed Kairo Labs metadata and preserved
+  hero, required-field focus/validation, Sending state, and truthful error with
+  clickable email and retained answers when Google is not configured.
+- Netlify dashboard access was confirmed for sharviladmuthe57@gmail.com. Its
+  team explicitly showed **Free**, 300 credits available, and **no credit card
+  info saved**. No plan, billing or payment settings were changed. GitHub import
+  was blocked by the app approval service's usage limit; the user was asked to
+  perform that click. No public deployment URL or live production QA is claimed
+  at this checkpoint. See `docs/netlify-free-deployment.md` for continuation.

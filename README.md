@@ -59,7 +59,16 @@ editable CAD geometry, and 3D visualization are not implemented yet.
 
 ## Product website
 
-The marketing site is the Next.js application at the repository root.
+The Kairo Labs marketing site is the Next.js application at the repository root.
+Brand/contact details are centralized in `src/config/site.ts`.
+
+The customer-discovery form now uses a server-side API route and Google Apps
+Script to append accepted responses to **Kairo Labs Leads → Responses**.
+Google account setup and private environment values are required before live
+submissions can be stored; missing configuration deliberately shows failure.
+See [Google Sheets setup](docs/google-sheets-form-setup.md) and
+[Netlify Free deployment](docs/netlify-free-deployment.md). Google Sheets can
+export all responses to Microsoft Excel. No paid service or local lead file is used.
 
 ```bash
 pnpm dev --webpack --hostname 127.0.0.1 --port 3001

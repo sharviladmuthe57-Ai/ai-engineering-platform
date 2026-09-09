@@ -1,12 +1,12 @@
 export const siteConfig = {
-  companyName: "PROJECT NAME",
+  companyName: "Kairo Labs",
   email: "sharviladmuthe57@gmail.com",
   phone: "",
   linkedin: "",
   github: "",
-  titleSuffix: "AI Engineering Design",
+  titleSuffix: "AI-Native Engineering Design",
   description:
-    "AI-native engineering design, starting with electrical systems generated from architectural drawings.",
+    "Kairo Labs is building AI-native engineering design software, starting with architectural-to-electrical workflows.",
   navigation: [
     { label: "Product", href: "#product" },
     { label: "How it works", href: "#approach" },

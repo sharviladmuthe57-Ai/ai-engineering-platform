@@ -31,4 +31,5 @@ out/
 dist/
 *.tsbuildinfo
 .vercel/
+.netlify/
 .pnpm-store/

@@ -1,0 +1,10 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Netlify's automatic Next.js adapter provides /api/feedback as a server function.
+# Do not enable Netlify Forms, Database, AI, paid plugins, or a static-export fallback.

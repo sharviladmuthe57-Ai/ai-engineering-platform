@@ -225,6 +225,11 @@ h2 em, h1 em { color: var(--accent); font-style: normal; }
 .radioRow input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
 .formSubmit { margin-top: 26px; }
 .formSubmit p { color: #b1bdb5; font-size: .74rem; margin: 16px 0 0; line-height: 1.5; }
+.form-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.formSubmit button:disabled { opacity: .65; cursor: wait; }
+.formSubmit .form-success { color: var(--accent); font-size: .9rem; }
+.formSubmit .form-error { color: #ffc5b8; font-size: .9rem; }
+.formSubmit .form-error a { text-decoration: underline; overflow-wrap: anywhere; }
 .final-section { position: relative; padding-block: 80px 100px; border-top: 1px solid var(--line); }
 .final-section::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 65% 80%, #5b8d7622, transparent 60%); }
 .final-section h2 { max-width: 980px; font-size: clamp(3rem, 6.3vw, 6rem); }
